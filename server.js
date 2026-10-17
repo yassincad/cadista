@@ -134,7 +134,7 @@ app.get('/', (req, res) => {
     <body>
         <div class="container hero">
             <!-- إضافة الشعار هنا -->
-            <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1/cad_ofppt_uploads/logo_cad" alt="شعار لجنة الانضباط الذاتية CAD" class="site-logo" onerror="this.onerror=null; this.src='https://i.imgur.com/7kX1g6u.png';">
+            <img src="WhatsApp_Image_2026-10-17_at_6.36.49_PM" alt="شعار لجنة الانضباط الذاتية CAD" class="site-logo" onerror="this.onerror=null; this.src='https://i.imgur.com/7kX1g6u.png';">
             
             <h1>لجنة الانضباط الذاتية (CAD)</h1>
             <p>المنصة الرسمية لتعزيز الانضباط، الالتزام، وتطوير مهارات متدربي مكتب التكوين المهني وإنعاش الشغل.</p>
