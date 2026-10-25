@@ -4,8 +4,8 @@ const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const path = require('path');
-const bcrypt = require('bcryptjs'); // 🔒 مكتبة تشفير كلمات المرور
-const session = require('express-session'); // 🔒 مكتبة إدارة الجلسات
+const bcrypt = require('bcryptjs');
+const session = require('express-session');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -102,8 +102,8 @@ const commonCSS = `
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1a365d;
-      --primary-light: #2b6cb0;
+      --primary: #0b192c;
+      --primary-light: #1e3e62;
       --accent: #0D9488;
       --bg: #f8fafc;
       --card-bg: #ffffff;
@@ -111,10 +111,10 @@ const commonCSS = `
       --border: #e2e8f0;
     }
     * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
-    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; direction: rtl; }
-    .container { max-width: 1000px; margin: 20px auto; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; direction: rtl; }
+    .container { max-width: 1100px; margin: 20px auto; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
     h1, h2, h3 { color: var(--primary); margin-top: 0; font-weight: 700; }
-    .btn { display: inline-block; background: var(--primary); color: white; padding: 10px 20px; text-decoration: none; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+    .btn { display: inline-block; background: var(--primary); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s ease; text-align: center; }
     .btn:hover { background: var(--primary-light); transform: translateY(-2px); }
     .btn-danger { background: #e11d48; }
     .btn-danger:hover { background: #be123c; }
@@ -128,12 +128,12 @@ const commonCSS = `
     tr:hover { background-color: #f1f5f9; }
     .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .badge-rank { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-    .site-logo { width: 140px; height: auto; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
   </style>
 `;
 
-// 1. الرئيسية
-app.get('/', (req, res) => {
+// 1. الرئيسية الجديدة المطابقة للتصميم المطلوب
+app.get('/', async (req, res) => {
+  const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -141,39 +141,167 @@ app.get('/', (req, res) => {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>لجنة الانضباط الذاتية - CAD OFPPT</title>
-        ${commonCSS}
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
         <style>
-          .hero { text-align: center; padding: 20px 20px 40px; }
-          .hero h1 { font-size: 2.2rem; margin-bottom: 10px; color: var(--primary); }
-          .hero p { color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto 30px; }
-          .btn-group { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; margin-bottom: 40px; }
-          .rules-card { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 25px; border-radius: 12px; text-align: right; }
-          .rules-card h3 { color: #166534; display: flex; align-items: center; gap: 8px; }
-          .rules-card li { margin-bottom: 10px; color: #15803d; }
+          * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
+          body { background-color: #0b192c; color: #ffffff; direction: rtl; }
+          
+          /* شريط التنقل العلوي */
+          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(11, 25, 44, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1); }
+          .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px; color: #ffffff; }
+          .nav-links { display: flex; gap: 25px; align-items: center; }
+          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; transition: 0.2s; }
+          .nav-links a:hover, .nav-links a.active { color: #38bdf8; }
+          .admin-btn { background: #0D9488; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+          /* القسم الرئيسي (Hero) */
+          .hero-section { position: relative; background: linear-gradient(135deg, #0b192c 0%, #1e3e62 100%); padding: 60px 5%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 40px; border-bottom: 4px solid #0D9488; }
+          .hero-content { max-width: 600px; }
+          .welcome-badge { color: #38bdf8; font-weight: 700; margin-bottom: 15px; display: inline-block; font-size: 16px; }
+          .hero-content h1 { font-size: 3rem; font-weight: 800; line-height: 1.2; margin-bottom: 15px; color: #ffffff; }
+          .hero-content p { color: #94a3b8; font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6; }
+          .hero-btns { display: flex; gap: 15px; flex-wrap: wrap; }
+          .btn-main { background: #0D9488; color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4); transition: 0.2s; }
+          .btn-main:hover { background: #0f766e; transform: translateY(-2px); }
+          .btn-outline { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; transition: 0.2s; }
+          .btn-outline:hover { background: rgba(255,255,255,0.15); }
+
+          /* بطاقة الإحصائيات الجانبية */
+          .stats-card { background: #112238; border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 16px; text-align: center; min-width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+          .stats-number { font-size: 3.5rem; font-weight: 800; color: #38bdf8; margin: 10px 0; }
+          .stats-label { color: #94a3b8; font-size: 1rem; font-weight: 600; }
+
+          /* قسم ما هي لجنة الانضباط */
+          .about-section { background: #ffffff; color: #1e293b; padding: 70px 5%; text-align: center; }
+          .section-title { font-size: 2.2rem; color: #0b192c; font-weight: 800; margin-bottom: 15px; }
+          .section-desc { max-width: 700px; margin: 0 auto 50px; color: #64748b; font-size: 1.1rem; line-height: 1.7; }
+          .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
+          .feature-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 30px 20px; border-radius: 12px; transition: 0.3s; }
+          .feature-box:hover { transform: translateY(-5px); border-color: #0D9488; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+          .feature-box h4 { color: #0b192c; font-size: 1.2rem; margin-bottom: 10px; }
+          .feature-box p { color: #64748b; font-size: 0.95rem; }
+          .tagline { font-size: 1.5rem; color: #0D9488; font-weight: 700; margin-top: 30px; }
+
+          /* قسم القوانين والمعايير */
+          .rules-section { background: #07111e; padding: 70px 5%; color: white; }
+          .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 40px; }
+          .rule-card { background: #112238; border: 1px solid rgba(255,255,255,0.08); padding: 25px; border-radius: 12px; display: flex; align-items: flex-start; gap: 15px; }
+          .rule-icon { color: #0D9488; font-size: 24px; font-weight: bold; background: rgba(13, 148, 136, 0.1); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
+          .rule-text { font-size: 1rem; color: #cbd5e1; line-height: 1.6; }
+
+          footer { background: #050d18; text-align: center; padding: 25px; color: #64748b; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); }
         </style>
     </head>
     <body>
-        <div class="container hero">
-            <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="site-logo" onerror="this.onerror=null; this.src='https://i.imgur.com/7kX1g6u.png';">
-            
-            <h1>لجنة الانضباط الذاتية (CAD)</h1>
-            <p>المنصة الرسمية لتعزيز الانضباط، الالتزام، وتطوير مهارات متدربي مكتب التكوين المهني وإنعاش الشغل.</p>
-            
-            <div class="btn-group">
-                <a href="/register" class="btn btn-success">تسجيل متدرب جديد</a>
-                <a href="/login" class="btn">تسجيل الدخول</a>
-                <a href="/admin-login" class="btn btn-danger">بوابة المشرفين</a>
-            </div>
 
-            <div class="rules-card">
-                <h3>📜 القوانين والمعايير الأساسية للمؤسسة:</h3>
-                <ul>
-                    <li>الالتزام التام بالتوقيت الإداري والزي المدرسي المحدد.</li>
-                    <li>التحلي بالأخلاق الحسنة والتعاون الإيجابي والاحترام المتبادل.</li>
-                    <li>المشاركة الفعالة في الأنشطة الموازية والمسابقات الرسمية.</li>
-                </ul>
+        <!-- شريط التنقل -->
+        <div class="navbar">
+            <div class="logo-area">
+                <span>CAD • OFPPT</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="active">الرئيسية</a>
+                <a href="#rules">القوانين والمعايير</a>
+                <a href="/register">التسجيل</a>
+                <a href="/login">تسجيل الدخول</a>
+                <a href="/admin-login" class="admin-btn">👤 المشرفين</a>
             </div>
         </div>
+
+        <!-- القسم الرئيسي (Hero) -->
+        <div class="hero-section">
+            <div class="hero-content">
+                <span class="welcome-badge">مرحباً بكم في موقع</span>
+                <h1>لجنة الانضباط الذاتية (CAD)</h1>
+                <p>معاً من أجل بيئة تكوينية أفضل في مؤسسة التكوين المهني و إنعاش الشغل OFPPT.</p>
+                <div class="hero-btns">
+                    <a href="/register" class="btn-main">تسجيل جديد</a>
+                    <a href="/login" class="btn-outline">تسجيل الدخول</a>
+                </div>
+            </div>
+            <div class="stats-card">
+                <div style="font-size: 28px;">👥</div>
+                <div class="stats-number">${acceptedCount}</div>
+                <div class="stats-label">عدد المتدربين المسجلين</div>
+            </div>
+        </div>
+
+        <!-- قسم ما هي لجنة الانضباط -->
+        <div class="about-section">
+            <h2 class="section-title">ما هي لجنة الانضباط الذاتية (CAD) ؟</h2>
+            <p class="section-desc">لجنة الانضباط الذاتية هي هيئة طلابية داخل مؤسسة التكوين المهني OFPPT، تعمل على تعزيز قيم الانضباط والسلوك الإيجابي، ومرافقة المتدربين في مسيرتهم التكوينية من أجل بيئة تعليمية سليمة ومحترمة.</p>
+            
+            <div class="features-grid">
+                <div class="feature-box">
+                    <h4>🤝 معاً نحو مستقبل أفضل</h4>
+                    <p>بناء جسد طلابي واعي ومسؤول.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>📈 التطوير والاقتراحات</h4>
+                    <p>تطوير المهارات والمقترحات الابتكارية.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>👥 تمثيل المتدربين والمرافقة</h4>
+                    <p>دعم المتدربين وسماع شكاياتهم.</p>
+                </div>
+                <div class="feature-box">
+                    <h4>🛡️ الانضباط والاحترام</h4>
+                    <p>الالتزام باللوائح والقوانين الداخلية.</p>
+                </div>
+            </div>
+
+            <div class="tagline">انضباطك ... نجاحك</div>
+        </div>
+
+        <!-- قسم القوانين والمعايير الدقيقة المطلوبة -->
+        <div class="rules-section" id="rules">
+            <h2 style="color: white; font-size: 2.2rem; text-align: center; margin-bottom: 10px;">القوانين والمعايير</h2>
+            <p style="color: #94a3b8; text-align: center; margin-bottom: 30px;">احترام هذه القوانين مسؤوليتك جميعاً من أجل بيئة تكوينية منظمة وآمنة.</p>
+            
+            <div class="rules-grid">
+                <div class="rule-card">
+                    <div class="rule-icon">01</div>
+                    <div class="rule-text">ارتداء اللباس المهني أو الزي المطلوب.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">02</div>
+                    <div class="rule-text">احترام الأطر الإدارية والتكوينية وباقي المتدربين.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">03</div>
+                    <div class="rule-text">المحافظة على تجهيزات المؤسسة وممتلكاتها.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">04</div>
+                    <div class="rule-text">عدم التدخين داخل المؤسسة.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">05</div>
+                    <div class="rule-text">عدم استعمال الهاتف أو الأجهزة الصوتية أثناء الدروس والامتحانات.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">06</div>
+                    <div class="rule-text">عدم إدخال مواد أو أدوات ممنوعة إلى المؤسسة.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">07</div>
+                    <div class="rule-text">الحضور قبل موعد الامتحان بنصف ساعة على الأقل.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">08</div>
+                    <div class="rule-text">احترام أوقات التكوين وعدم البقاء في المؤسسة خارج الأوقات المحددة.</div>
+                </div>
+                <div class="rule-card">
+                    <div class="rule-icon">09</div>
+                    <div class="rule-text">تجنب الغياب والتأخر، فقد تُسجَّل المخالفات وتؤثر في التقييم أو تؤدي إلى إجراءات إدارية.</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>جميع الحقوق محفوظة © لجنة الانضباط الذاتية CAD OFPPT 2026</p>
+        </footer>
+
     </body>
     </html>
   `);
@@ -569,7 +697,7 @@ app.get('/admin-login', (req, res) => {
   `);
 });
 
-// لوحة تحكم المشرفين (مع زر الانتقال لدليل مهارات المتدربين)
+// لوحة تحكم المشرفين
 app.post('/admin-dashboard', async (req, res) => {
   const { adminPass } = req.body;
   if (adminPass !== 'caddac@2004' && !req.session.isAdmin) {
@@ -601,7 +729,6 @@ app.post('/admin-dashboard', async (req, res) => {
         <div class="container">
             <h2>🛡️ لوحة التحكم الخاصة بلجنة CAD</h2>
             
-            <!-- زر الانتقال لدليل المهارات الخاص بالمشرفين -->
             <div style="margin-bottom: 25px; text-align: left;">
                 <a href="/skills-directory" class="btn" style="background: var(--accent);">🌐 عرض دليل مهارات المتدربين</a>
             </div>
@@ -909,7 +1036,7 @@ app.post('/admin/initiative/review', async (req, res) => {
 });
 
 app.post('/admin/initiative/delete', async (req, res) => {
-  const { id } = req.body;
+  const { id => id } = req.body;
   await Initiative.findByIdAndDelete(id);
   res.redirect(307, '/admin-dashboard');
 });
