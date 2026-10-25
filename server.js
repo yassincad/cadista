@@ -133,7 +133,6 @@ app.get('/', (req, res) => {
     </head>
     <body>
         <div class="container hero">
-            <!-- إضافة الشعار هنا -->
             <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="site-logo" onerror="this.onerror=null; this.src='https://i.imgur.com/7kX1g6u.png';">
             
             <h1>لجنة الانضباط الذاتية (CAD)</h1>
@@ -159,7 +158,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 2. صفحة التسجيل (تغيير النص إلى صورة المتدرب)
+// 2. صفحة التسجيل
 app.get('/register', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -175,7 +174,7 @@ app.get('/register', (req, res) => {
             <h2>إنشاء حساب متدرب جديد</h2>
             <form action="/register" method="POST" enctype="multipart/form-data">
                 <label>الاسم الكامل:</label>
-                <input type="text" name="fullname" placeholder="مثال: محمد العلوي" required>
+                <input type="text" name="fullname" placeholder="مثال: محمد" required>
                 
                 <label>رقم بطاقة التعريف الوطنية (CIN):</label>
                 <input type="text" name="cin" placeholder="مثال: AB123456" required>
@@ -261,13 +260,13 @@ app.post('/login', async (req, res) => {
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// 4. ملف المتدرب الشخصي (مع عرض حالة الشكاية المحدثة)
+// 4. ملف المتدرب الشخصي (مع عرض جميع الإعلانات المنشورة)
 app.get('/profile', async (req, res) => {
   const { cin } = req.query;
   const user = await User.findOne({ cin });
   if (!user) return res.redirect('/login');
 
-  const latestAnnouncement = await Announcement.findOne().sort({ _id: -1 }) || { text: "لا توجد إعلانات جديدة حالياً.", image: "" };
+  const announcements = await Announcement.find().sort({ _id: -1 });
   const settings = await Settings.findOne({ key: 'star' });
   const isStar = settings && settings.starCin === user.cin;
   const competitions = await Competition.find();
@@ -282,16 +281,22 @@ app.get('/profile', async (req, res) => {
         <title>الملف الشخصي - ${user.fullname}</title>
         ${commonCSS}
         <style>
-          .announcement-box { background: #fef3c7; border: 1px solid #fde68a; color: #92400e; padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+          .announcement-box { background: #fef3c7; border: 1px solid #fde68a; color: #92400e; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
           .star-badge { background: #fef08a; color: #854d0e; padding: 10px 15px; border-radius: 8px; border: 1px solid #facc15; font-weight: bold; margin-bottom: 20px; display: inline-block; }
           .card-section { background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="announcement-box">
-                🔔 <strong>إعلان هام من اللجنة:</strong> ${latestAnnouncement.text}
-                ${latestAnnouncement.image ? `<br><img src="${latestAnnouncement.image}" style="max-width:200px; margin-top:10px; border-radius:8px;">` : ''}
+            <!-- عرض الإعلانات -->
+            <div class="card-section" style="background: #fffbeb; border-color: #fde68a;">
+                <h3>📢 الإعلانات والتنبيهات الهامة</h3>
+                ${announcements.length > 0 ? announcements.map(a => `
+                    <div class="announcement-box">
+                        🔔 <strong>إعلان من اللجنة:</strong> ${a.text}
+                        ${a.image ? `<br><img src="${a.image}" style="max-width:250px; margin-top:10px; border-radius:8px; display:block;">` : ''}
+                    </div>
+                `).join('') : '<p style="color: #64748b;">لا توجد إعلانات جديدة حالياً.</p>'}
             </div>
 
             <h2>مرحباً بك، ${user.fullname} 👋</h2>
@@ -406,7 +411,7 @@ app.get('/admin-login', (req, res) => {
   `);
 });
 
-// 6. لوحة تحكم المشرفين مع إدارة الشكايات (قبول وحذف)
+// 6. لوحة تحكم المشرفين مع إدارة الإعلانات والشكايات
 app.post('/admin-dashboard', async (req, res) => {
   const { adminPass } = req.body;
   if (adminPass !== 'caddac@2004') {
@@ -415,6 +420,7 @@ app.post('/admin-dashboard', async (req, res) => {
 
   const users = await User.find();
   const complaints = await Complaint.find();
+  const announcements = await Announcement.find().sort({ _id: -1 });
   const competitions = await Competition.find();
 
   res.send(`
@@ -494,8 +500,9 @@ app.post('/admin-dashboard', async (req, res) => {
                 </table>
             </div>
 
+            <!-- نشر وإدارة الإعلانات -->
             <div class="admin-section">
-                <h3>📢 نشر إعلان جديد</h3>
+                <h3>📢 نشر وإدارة الإعلانات</h3>
                 <form action="/admin/add-announcement" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="adminPass" value="cad2026">
                     <textarea name="text" placeholder="اكتب نص الإعلان هنا..." required></textarea>
@@ -503,6 +510,31 @@ app.post('/admin-dashboard', async (req, res) => {
                     <input type="file" name="annImage" accept="image/*">
                     <button type="submit" class="btn">نشر الإعلان</button>
                 </form>
+
+                <h4 style="margin-top:20px;">الإعلانات المنشورة حالياً:</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نص الإعلان</th>
+                            <th>الصورة المرفقة</th>
+                            <th>الإجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${announcements.length > 0 ? announcements.map(a => `
+                            <tr>
+                                <td>${a.text}</td>
+                                <td>${a.image ? `<a href="${a.image}" target="_blank" style="color:var(--accent);">عرض الصورة</a>` : 'لا توجد'}</td>
+                                <td>
+                                    <form action="/admin/announcement/delete" method="POST" style="margin:0;">
+                                        <input type="hidden" name="id" value="${a._id}">
+                                        <button type="submit" class="btn btn-danger" style="padding:4px 8px; font-size:12px;">حذف الإعلان</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="3" style="text-align:center;">لا توجد إعلانات منشورة</td></tr>'}
+                    </tbody>
+                </table>
             </div>
 
             <div class="admin-section">
@@ -526,7 +558,7 @@ app.post('/admin-dashboard', async (req, res) => {
                 </form>
             </div>
 
-            <!-- الشكايات مع أزرار المعالجة والحذف -->
+            <!-- الشكايات -->
             <div class="admin-section">
                 <h3>📩 الشكايات والملاحظات الواردة</h3>
                 <table>
@@ -590,13 +622,20 @@ app.post('/admin-dashboard', async (req, res) => {
   `);
 });
 
-// المسارات الخاصة بالإجراءات الإدارية والشكايات
+// المسارات الخاصة بالإعلانات والشكايات والتحكم
 app.post('/admin/add-announcement', upload.single('annImage'), async (req, res) => {
   const { text } = req.body;
   await Announcement.create({
     text,
     image: req.file ? req.file.path : ''
   });
+  res.redirect(307, '/admin-dashboard');
+});
+
+// مسار حذف إعلان
+app.post('/admin/announcement/delete', async (req, res) => {
+  const { id } = req.body;
+  await Announcement.findByIdAndDelete(id);
   res.redirect(307, '/admin-dashboard');
 });
 
@@ -634,7 +673,6 @@ app.post('/admin/delete', async (req, res) => {
   res.redirect(307, '/admin-dashboard');
 });
 
-// مسارات إدارة الشكايات (قبول وحذف)
 app.post('/admin/complaint/review', async (req, res) => {
   const { id } = req.body;
   await Complaint.findByIdAndUpdate(id, { status: 'تمت معالجة شكايتك من طرف اللجنة' });
