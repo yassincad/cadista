@@ -53,7 +53,7 @@ const userSchema = new mongoose.Schema({
   skills: [String],
   languages: [String],
   skillImage: { type: String, default: '' },
-  warnings: [{ text: String, date: { type: Date, default: Date.now } }] // ⚠️ نظام الإنذارات الفردية الخاصة
+  warnings: [{ text: String, date: { type: Date, default: Date.now } }]
 });
 
 const complaintSchema = new mongoose.Schema({
@@ -81,7 +81,6 @@ const settingsSchema = new mongoose.Schema({
   starCin: String
 });
 
-// 💡 نموذج صندوق الابتكار والمبادرات
 const initiativeSchema = new mongoose.Schema({
   senderName: String,
   senderCin: String,
@@ -163,7 +162,6 @@ app.get('/', (req, res) => {
             <div class="btn-group">
                 <a href="/register" class="btn btn-success">تسجيل متدرب جديد</a>
                 <a href="/login" class="btn">تسجيل الدخول</a>
-                <a href="/skills-directory" class="btn" style="background: var(--accent);">🌐 دليل مهارات المتدربين</a>
                 <a href="/admin-login" class="btn btn-danger">بوابة المشرفين</a>
             </div>
 
@@ -181,8 +179,11 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 🌐 2. صفحة دليل مهارات ومشاريع المتدربين
+// 🔒 2. صفحة دليل مهارات المتدربين (متاحة حصراً للمشرفين)
 app.get('/skills-directory', async (req, res) => {
+  if (!req.session.isAdmin) {
+    return res.redirect('/admin-login');
+  }
   const acceptedUsers = await User.find({ status: 'accepted' });
   res.send(`
     <!DOCTYPE html>
@@ -190,13 +191,13 @@ app.get('/skills-directory', async (req, res) => {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>دليل مهارات المتدربين</title>
+        <title>دليل مهارات المتدربين - لوحة المشرفين</title>
         ${commonCSS}
     </head>
     <body>
         <div class="container">
-            <h2>🌐 دليل مهارات وخبرات المتدربين</h2>
-            <p style="color: #64748b; margin-bottom: 20px;">تعرف على المهارات التقنية واللغات التي يتقنها زملاؤك في مختلف الشعب والتخصصات.</p>
+            <h2>🌐 دليل مهارات وخبرات المتدربين (خاص بالمشرفين)</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">قائمة بمهارات ولغات المتدربين المقبولين في المؤسسة.</p>
             <table>
                 <thead>
                     <tr>
@@ -219,7 +220,7 @@ app.get('/skills-directory', async (req, res) => {
                     `).join('') : '<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد بيانات مسجلة حالياً</td></tr>'}
                 </tbody>
             </table>
-            <p style="text-align:center; margin-top:30px;"><a href="/" class="btn" style="text-decoration:none;">العودة للرئيسية</a></p>
+            <p style="text-align:center; margin-top:30px;"><a href="/admin-dashboard" class="btn" style="text-decoration:none;">العودة لوحة التحكم</a></p>
         </div>
     </body>
     </html>
@@ -341,7 +342,7 @@ app.post('/login', async (req, res) => {
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// 4. الملف الشخصي للمتدرب (مع عرض الإنذارات الخاصة وصندوق الابتكار)
+// الملف الشخصي للمتدرب
 app.get('/profile', async (req, res) => {
   const cin = req.query.cin ? req.query.cin.trim().toUpperCase() : '';
   const user = await User.findOne({ cin });
@@ -381,7 +382,6 @@ app.get('/profile', async (req, res) => {
     </head>
     <body>
         <div class="container">
-            <!-- ⚠️ قسم التنبيهات والإنذارات الفردية الخاصة إن وجدت -->
             ${user.warnings && user.warnings.length > 0 ? `
                 <div class="card-section" style="background: #fff5f5; border-color: #fecaca;">
                     <h3 style="color: #9f1239; margin-bottom: 15px;">⚠️ تنبيهات وانذارات الإدارة الخاصة</h3>
@@ -393,7 +393,6 @@ app.get('/profile', async (req, res) => {
                 </div>
             ` : ''}
 
-            <!-- الإعلانات العامة -->
             ${announcements.length > 0 ? `
                 <div class="card-section" style="background: #fffdf4; border-color: #fef08a;">
                     <h3 style="color: #b45309; margin-bottom: 15px;">📢 لوحة الإعلانات والتنبيهات</h3>
@@ -409,9 +408,6 @@ app.get('/profile', async (req, res) => {
             <div class="profile-header">
                 <h2>مرحباً بك، ${user.fullname} 👋</h2>
                 <p style="margin: 5px 0 0; opacity: 0.9;">الشعبة / القسم: <strong>${user.group}</strong></p>
-                <div style="margin-top:15px;">
-                    <a href="/skills-directory" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; padding: 6px 15px; font-size: 13px;">🌐 تصفح دليل مهارات الزملاء</a>
-                </div>
             </div>
 
             ${isStar ? '<div class="star-banner">🌟 تهانينا الحارة! تم اختيارك كنجم الشهر نظيراً لانضباطك وتميزك المستمر!</div>' : ''}
@@ -441,7 +437,6 @@ app.get('/profile', async (req, res) => {
                 ${user.skillImage ? `<div style="margin-top:15px;"><p style="font-size:13px; color:#64748b;">الصورة الحالية:</p><img src="${user.skillImage}" style="max-width:160px; border-radius:8px; border: 1px solid var(--border);"></div>` : ''}
             </div>
 
-            <!-- 💡 صندوق الابتكار والمبادرات الطلابية -->
             <div class="card-section">
                 <h3>💡 صندوق الابتكار والمبادرات الطلابية</h3>
                 <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">شاركنا بأفكارك الابتكارية أو مقترحاتك لتطوير فضاء المؤسسة أو الأنشطة الموازية.</p>
@@ -532,7 +527,6 @@ app.post('/add-complaint', async (req, res) => {
   res.send(`<script>alert('تم تقديم الشكاية بنجاح.'); window.location.href='/profile?cin=${cin}';</script>`);
 });
 
-// إرسال مبادرة جديدة
 app.post('/add-initiative', async (req, res) => {
   const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
   const { initiativeText } = req.body;
@@ -575,7 +569,7 @@ app.get('/admin-login', (req, res) => {
   `);
 });
 
-// لوحة تحكم المشرفين
+// لوحة تحكم المشرفين (مع زر الانتقال لدليل مهارات المتدربين)
 app.post('/admin-dashboard', async (req, res) => {
   const { adminPass } = req.body;
   if (adminPass !== 'caddac@2004' && !req.session.isAdmin) {
@@ -607,6 +601,11 @@ app.post('/admin-dashboard', async (req, res) => {
         <div class="container">
             <h2>🛡️ لوحة التحكم الخاصة بلجنة CAD</h2>
             
+            <!-- زر الانتقال لدليل المهارات الخاص بالمشرفين -->
+            <div style="margin-bottom: 25px; text-align: left;">
+                <a href="/skills-directory" class="btn" style="background: var(--accent);">🌐 عرض دليل مهارات المتدربين</a>
+            </div>
+
             <div class="admin-section">
                 <h3>🔍 البحث السريع عن المتدربين وإدارة الإنذارات</h3>
                 <div class="search-box">
@@ -724,7 +723,6 @@ app.post('/admin-dashboard', async (req, res) => {
                 </form>
             </div>
 
-            <!-- 💡 إدارة صندوق الابتكار والمبادرات -->
             <div class="admin-section">
                 <h3>💡 صندوق الابتكار والمبادرات الواردة</h3>
                 <table>
@@ -862,7 +860,6 @@ app.post('/admin/update-rank', async (req, res) => {
   res.redirect(307, '/admin-dashboard');
 });
 
-// ⚠️ إرسال إنذار أو تنبيه خاص لمتدرب
 app.post('/admin/add-warning', async (req, res) => {
   const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
   const { warningText } = req.body;
@@ -905,7 +902,6 @@ app.post('/admin/complaint/delete', async (req, res) => {
   res.redirect(307, '/admin-dashboard');
 });
 
-// مراجعة أو حذف المبادرات
 app.post('/admin/initiative/review', async (req, res) => {
   const { id } = req.body;
   await Initiative.findByIdAndUpdate(id, { status: 'تم قبول المبادرة ودراستها' });
