@@ -280,7 +280,7 @@ app.post('/login', async (req, res) => {
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// 4. ملف المتدرب
+// 4. ملف المتدرب الشخصي (مع التحسينات البصرية الجديدة للواجهة)
 app.get('/profile', async (req, res) => {
   const { cin } = req.query;
   const user = await User.findOne({ cin });
@@ -292,6 +292,13 @@ app.get('/profile', async (req, res) => {
   const competitions = await Competition.find();
   const userComplaints = await Complaint.find({ senderCin: user.cin });
 
+  // تحديد وصف الرتبة لتوضيحه للمتدرب
+  let rankDesc = 'انضباط متوسط';
+  let rankColor = '#d97706';
+  if (user.rank === 'A') { rankDesc = 'متاز - انضباط تام وتميز'; rankColor = '#059669'; }
+  else if (user.rank === 'B') { rankDesc = 'جيد جداً - ملتزم بالقوانين'; rankColor = '#2563eb'; }
+  else if (user.rank === 'D') { rankDesc = 'تحت المراقبة - يتطلب تحسين عاجل'; rankColor = '#e11d48'; }
+
   res.send(`
     <!DOCTYPE html>
     <html lang="ar" dir="rtl">
@@ -301,74 +308,98 @@ app.get('/profile', async (req, res) => {
         <title>الملف الشخصي - ${user.fullname}</title>
         ${commonCSS}
         <style>
-          .announcement-box { background: #fef3c7; border: 1px solid #fde68a; color: #92400e; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
-          .star-badge { background: #fef08a; color: #854d0e; padding: 10px 15px; border-radius: 8px; border: 1px solid #facc15; font-weight: bold; margin-bottom: 20px; display: inline-block; }
-          .card-section { background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+          .profile-header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+          .profile-header h2 { color: white; margin-bottom: 5px; }
+          .announcement-box { background: #fffbeb; border-right: 4px solid #f59e0b; color: #92400e; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+          .star-banner { background: linear-gradient(135deg, #fef08a, #fde047); color: #713f12; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(234, 179, 8, 0.2); }
+          .card-section { background: #ffffff; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+          .rank-legend { font-size: 13px; color: #64748b; margin-top: 5px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: inline-block; }
+          .complaint-item { background: #f8fafc; border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         </style>
     </head>
     <body>
         <div class="container">
-            <div class="card-section" style="background: #fffbeb; border-color: #fde68a;">
-                <h3>📢 الإعلانات والتنبيهات الهامة</h3>
-                ${announcements.length > 0 ? announcements.map(a => `
-                    <div class="announcement-box">
-                        🔔 <strong>إعلان من اللجنة:</strong> ${a.text}
-                        ${a.image ? `<br><img src="${a.image}" style="max-width:250px; margin-top:10px; border-radius:8px; display:block;">` : ''}
-                    </div>
-                `).join('') : '<p style="color: #64748b;">لا توجد إعلانات جديدة حالياً.</p>'}
+            <!-- الإعلانات الهامة -->
+            ${announcements.length > 0 ? `
+                <div class="card-section" style="background: #fffdf4; border-color: #fef08a;">
+                    <h3 style="color: #b45309; margin-bottom: 15px;">📢 لوحة الإعلانات والتنبيهات</h3>
+                    ${announcements.map(a => `
+                        <div class="announcement-box">
+                            <div>🔔 ${a.text}</div>
+                            ${a.image ? `<img src="${a.image}" style="max-width:220px; margin-top:10px; border-radius:8px; display:block; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <!-- رأس الملف الشخصي -->
+            <div class="profile-header">
+                <h2>مرحباً بك، ${user.fullname} 👋</h2>
+                <p style="margin: 5px 0 0; opacity: 0.9;">الشعبة / القسم: <strong>${user.group}</strong></p>
             </div>
 
-            <h2>مرحباً بك، ${user.fullname} 👋</h2>
-            <p><strong>الشعبة:</strong> ${user.group} | <strong>الرتبة الانضباطية:</strong> <span class="badge badge-rank">الرتبة ${user.rank}</span></p>
+            ${isStar ? '<div class="star-banner">🌟 تهانينا الحارة! تم اختيارك كنجم الشهر نظيراً لانضباطك وتميزك المستمر!</div>' : ''}
 
-            ${isStar ? '<div class="star-badge">🌟 تهانينا! تم اختيارك كنجم الشهر نظيراً لانضباطك وتميزك!</div>' : ''}
-
+            <!-- قسم الرتبة الانضباطية -->
             <div class="card-section">
-                <h3>تحديث المهارات واللغات</h3>
+                <h3>🎖️ وضعك الانضباطي الحالي</h3>
+                <p>الرتبة الانضباطية المسجلة: <span class="badge badge-rank" style="font-size: 16px; padding: 6px 16px;">الرتبة ${user.rank}</span></p>
+                <div class="rank-legend">
+                    💡 <strong>دلالة الرتبة:</strong> <span style="color: ${rankColor}; font-weight: bold;">${rankDesc}</span>
+                </div>
+            </div>
+
+            <!-- تحديث المهارات -->
+            <div class="card-section">
+                <h3>🛠️ تحديث مهاراتك ولغاتك</h3>
                 <form action="/update-profile" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="cin" value="${user.cin}">
-                    <label>المهارات (افصل بينها بفواصل):</label>
-                    <input type="text" name="skills" value="${user.skills.join(', ')}">
+                    <label>المهارات التقنية (افصل بينها بفواصل):</label>
+                    <input type="text" name="skills" value="${user.skills.join(', ')}" placeholder="مثال: JavaScript, Node.js, تصميم">
                     
                     <label>اللغات المتقنة:</label>
-                    <input type="text" name="languages" value="${user.languages.join(', ')}">
+                    <input type="text" name="languages" value="${user.languages.join(', ')}" placeholder="مثال: العربية, الفرنسية, الإنجليزية">
                     
-                    <label>صورة لإنجاز أو مهارة:</label>
+                    <label>صورة لإنجاز أو شهادة أو مهارة (اختياري):</label>
                     <input type="file" name="skillImage" accept="image/*">
-                    <button type="submit" class="btn">تحديث البيانات</button>
+                    <button type="submit" class="btn" style="margin-top: 10px;">حفظ التحديثات</button>
                 </form>
-                ${user.skillImage ? `<br><img src="${user.skillImage}" style="max-width:150px; border-radius:8px; margin-top:10px;">` : ''}
+                ${user.skillImage ? `<div style="margin-top:15px;"><p style="font-size:13px; color:#64748b;">الصورة الحالية:</p><img src="${user.skillImage}" style="max-width:160px; border-radius:8px; border: 1px solid var(--border);"></div>` : ''}
             </div>
 
+            <!-- الشكايات والاقتراحات -->
             <div class="card-section">
-                <h3>تقديم شكاية أو اقتراح</h3>
+                <h3>📩 تقديم شكاية أو اقتراح للجنة</h3>
                 <form action="/add-complaint" method="POST">
                     <input type="hidden" name="cin" value="${user.cin}">
-                    <textarea name="complaintText" rows="3" placeholder="اكتب شكايتك أو ملاحظتك هنا بوضوح..." required></textarea>
-                    <button type="submit" class="btn btn-danger">إرسال للجنة</button>
+                    <textarea name="complaintText" rows="3" placeholder="اكتب شكايتك أو مقترحك هنا بسرية وبوضوح..." required></textarea>
+                    <button type="submit" class="btn btn-danger">إرسال للجنة الانضباط</button>
                 </form>
 
-                <h4 style="margin-top:20px;">متابعة شكاياتك:</h4>
-                <ul>
+                <h4 style="margin-top: 25px; border-bottom: 2px solid var(--border); padding-bottom: 8px;">📋 سجل متابعة شكاياتك:</h4>
+                <div style="margin-top: 15px;">
                     ${userComplaints.length > 0 ? userComplaints.map(c => `
-                        <li>
-                            <b>${c.text}</b> - 
-                            <span style="color:${c.status === 'قيد المراجعة' ? '#d97706' : '#059669'}; font-weight:bold;">
-                                ${c.status === 'قيد المراجعة' ? 'قيد المراجعة' : 'تمت معالجة شكايتك من طرف اللجنة'}
-                            </span>
-                        </li>
-                    `).join('') : '<li>لا توجد شكايات مرسلة حالياً.</li>'}
-                </ul>
+                        <div class="complaint-item">
+                            <div><strong>${c.text}</strong></div>
+                            <div>
+                                <span class="badge" style="background: ${c.status === 'قيد المراجعة' ? '#fef3c7' : '#d1fae5'}; color: ${c.status === 'قيد المراجعة' ? '#d97706' : '#059669'};">
+                                    ${c.status}
+                                </span>
+                            </div>
+                        </div>
+                    `).join('') : '<p style="color: #64748b; font-size: 14px;">لا توجد شكايات مرسلة حالياً.</p>'}
+                </div>
             </div>
 
+            <!-- المسابقات -->
             <div class="card-section">
-                <h3>جدول المسابقات والنتائج</h3>
-                <ul>
-                    ${competitions.length > 0 ? competitions.map(c => `<li><b>${c.title}:</b>${c.result}</li>`).join('') : '<li>لا توجد مسابقات حالياً.</li>'}
+                <h3>🏆 نتائج المسابقات والأنشطة</h3>
+                <ul style="padding-right: 20px; margin: 0;">
+                    ${competitions.length > 0 ? competitions.map(c => `<li style="margin-bottom: 8px;"><b>${c.title}:</b> ${c.result}</li>`).join('') : '<p style="color: #64748b; font-size: 14px;">لا توجد مسابقات معلنة حالياً.</p>'}
                 </ul>
             </div>
 
-            <p style="text-align:center;"><a href="/" class="btn btn-danger" style="text-decoration:none;">تسجيل الخروج</a></p>
+            <p style="text-align:center; margin-top: 30px;"><a href="/" class="btn btn-danger" style="text-decoration:none; padding: 12px 30px;">تسجيل الخروج</a></p>
         </div>
     </body>
     </html>
