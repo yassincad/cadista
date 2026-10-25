@@ -41,13 +41,13 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 
-// Schemas & Models
+// Schemas & Models (مع تفعيل trim تلقائياً لـ CIN لضمان نظافة البيانات)
 const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
-  cin: { type: String, required: true, unique: true, uppercase: true },
+  cin: { type: String, required: true, unique: true, uppercase: true, trim: true },
   pnj: { type: String, required: true },
   group: { type: String, required: true },
-  password: { type: String, required: true }, // ستحفظ مشفرة الآن
+  password: { type: String, required: true },
   status: { type: String, default: 'pending' },
   rank: { type: String, default: 'C' },
   skills: [String],
@@ -157,7 +157,7 @@ app.get('/', (req, res) => {
             <div class="rules-card">
                 <h3>📜 القوانين والمعايير الأساسية للمؤسسة:</h3>
                 <ul>
-                    <li>الالتزام التام بالتوقيت الإداري والزي المحدد.</li>
+                    <li>الالتزام التام بالتوقيت الإداري والزي المدرسي المحدد.</li>
                     <li>التحلي بالأخلاق الحسنة والتعاون الإيجابي والاحترام المتبادل.</li>
                     <li>المشاركة الفعالة في الأنشطة الموازية والمسابقات الرسمية.</li>
                 </ul>
@@ -168,7 +168,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 2. التسجيل مع تشفير كلمة المرور
+// 2. التسجيل
 app.get('/register', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -209,15 +209,19 @@ app.get('/register', (req, res) => {
 
 app.post('/register', upload.single('pnj'), async (req, res) => {
   try {
-    const { fullname, cin, group, password } = req.body;
+    const { fullname, group, password } = req.body;
+    const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
     const fileUrl = req.file ? req.file.path : '';
     
-    // 🔒 تشفير كلمة المرور
+    if (!cin) {
+      return res.send(`<script>alert('المرجو إدخال رقم بطاقة التعريف الوطنية بشكل صحيح.'); window.location.href='/register';</script>`);
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
     await User.create({
       fullname,
-      cin: cin.trim().toUpperCase(),
+      cin,
       pnj: fileUrl,
       group,
       password: hashedPassword
@@ -229,7 +233,7 @@ app.post('/register', upload.single('pnj'), async (req, res) => {
   }
 });
 
-// 3. تسجيل الدخول مع مقارنة التشفير
+// 3. تسجيل الدخول
 app.get('/login', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -266,7 +270,6 @@ app.post('/login', async (req, res) => {
     return res.send(`<script>alert('بيانات الدخول غير صحيحة!'); window.location.href='/login';</script>`);
   }
 
-  // 🔒 فك تشفير وفحص كلمة المرور
   const isMatch = await bcrypt.compare(password, user.password).catch(() => password === user.password);
   if (!isMatch) {
     return res.send(`<script>alert('بيانات الدخول غير صحيحة!'); window.location.href='/login';</script>`);
@@ -280,9 +283,9 @@ app.post('/login', async (req, res) => {
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// 4. ملف المتدرب الشخصي (مع التحسينات البصرية الجديدة للواجهة)
+// 4. الملف الشخصي للمتدرب
 app.get('/profile', async (req, res) => {
-  const { cin } = req.query;
+  const cin = req.query.cin ? req.query.cin.trim().toUpperCase() : '';
   const user = await User.findOne({ cin });
   if (!user) return res.redirect('/login');
 
@@ -292,10 +295,9 @@ app.get('/profile', async (req, res) => {
   const competitions = await Competition.find();
   const userComplaints = await Complaint.find({ senderCin: user.cin });
 
-  // تحديد وصف الرتبة لتوضيحه للمتدرب
   let rankDesc = 'انضباط متوسط';
   let rankColor = '#d97706';
-  if (user.rank === 'A') { rankDesc = 'متاز - انضباط تام وتميز'; rankColor = '#059669'; }
+  if (user.rank === 'A') { rankDesc = 'ممتاز - انضباط تام وتميز'; rankColor = '#059669'; }
   else if (user.rank === 'B') { rankDesc = 'جيد جداً - ملتزم بالقوانين'; rankColor = '#2563eb'; }
   else if (user.rank === 'D') { rankDesc = 'تحت المراقبة - يتطلب تحسين عاجل'; rankColor = '#e11d48'; }
 
@@ -319,7 +321,6 @@ app.get('/profile', async (req, res) => {
     </head>
     <body>
         <div class="container">
-            <!-- الإعلانات الهامة -->
             ${announcements.length > 0 ? `
                 <div class="card-section" style="background: #fffdf4; border-color: #fef08a;">
                     <h3 style="color: #b45309; margin-bottom: 15px;">📢 لوحة الإعلانات والتنبيهات</h3>
@@ -332,7 +333,6 @@ app.get('/profile', async (req, res) => {
                 </div>
             ` : ''}
 
-            <!-- رأس الملف الشخصي -->
             <div class="profile-header">
                 <h2>مرحباً بك، ${user.fullname} 👋</h2>
                 <p style="margin: 5px 0 0; opacity: 0.9;">الشعبة / القسم: <strong>${user.group}</strong></p>
@@ -340,7 +340,6 @@ app.get('/profile', async (req, res) => {
 
             ${isStar ? '<div class="star-banner">🌟 تهانينا الحارة! تم اختيارك كنجم الشهر نظيراً لانضباطك وتميزك المستمر!</div>' : ''}
 
-            <!-- قسم الرتبة الانضباطية -->
             <div class="card-section">
                 <h3>🎖️ وضعك الانضباطي الحالي</h3>
                 <p>الرتبة الانضباطية المسجلة: <span class="badge badge-rank" style="font-size: 16px; padding: 6px 16px;">الرتبة ${user.rank}</span></p>
@@ -349,13 +348,12 @@ app.get('/profile', async (req, res) => {
                 </div>
             </div>
 
-            <!-- تحديث المهارات -->
             <div class="card-section">
                 <h3>🛠️ تحديث مهاراتك ولغاتك</h3>
                 <form action="/update-profile" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="cin" value="${user.cin}">
                     <label>المهارات التقنية (افصل بينها بفواصل):</label>
-                    <input type="text" name="skills" value="${user.skills.join(', ')}" placeholder="مثال: JavaScript, Node.js, تصميم">
+                    <input type="text" name="skills" value="${user.skills.join(', ')}" placeholder="مثال: JavaScript, Node.js">
                     
                     <label>اللغات المتقنة:</label>
                     <input type="text" name="languages" value="${user.languages.join(', ')}" placeholder="مثال: العربية, الفرنسية, الإنجليزية">
@@ -367,7 +365,6 @@ app.get('/profile', async (req, res) => {
                 ${user.skillImage ? `<div style="margin-top:15px;"><p style="font-size:13px; color:#64748b;">الصورة الحالية:</p><img src="${user.skillImage}" style="max-width:160px; border-radius:8px; border: 1px solid var(--border);"></div>` : ''}
             </div>
 
-            <!-- الشكايات والاقتراحات -->
             <div class="card-section">
                 <h3>📩 تقديم شكاية أو اقتراح للجنة</h3>
                 <form action="/add-complaint" method="POST">
@@ -391,7 +388,6 @@ app.get('/profile', async (req, res) => {
                 </div>
             </div>
 
-            <!-- المسابقات -->
             <div class="card-section">
                 <h3>🏆 نتائج المسابقات والأنشطة</h3>
                 <ul style="padding-right: 20px; margin: 0;">
@@ -407,7 +403,8 @@ app.get('/profile', async (req, res) => {
 });
 
 app.post('/update-profile', upload.single('skillImage'), async (req, res) => {
-  const { cin, skills, languages } = req.body;
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
+  const { skills, languages } = req.body;
   const updateData = {
     skills: skills ? skills.split(',').map(s => s.trim()) : [],
     languages: languages ? languages.split(',').map(l => l.trim()) : []
@@ -421,7 +418,8 @@ app.post('/update-profile', upload.single('skillImage'), async (req, res) => {
 });
 
 app.post('/add-complaint', async (req, res) => {
-  const { cin, complaintText } = req.body;
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
+  const { complaintText } = req.body;
   const user = await User.findOne({ cin });
   if (user) {
     await Complaint.create({
@@ -548,7 +546,6 @@ app.post('/admin-dashboard', async (req, res) => {
                 </table>
             </div>
 
-            <!-- نشر وإدارة الإعلانات -->
             <div class="admin-section">
                 <h3>📢 نشر وإدارة الإعلانات</h3>
                 <form action="/admin/add-announcement" method="POST" enctype="multipart/form-data">
@@ -666,7 +663,7 @@ app.post('/admin-dashboard', async (req, res) => {
   `);
 });
 
-// المسارات والإجراءات
+// المسارات والإجراءات الإدارية
 app.post('/admin/add-announcement', upload.single('annImage'), async (req, res) => {
   const { text } = req.body;
   await Announcement.create({
@@ -683,7 +680,7 @@ app.post('/admin/announcement/delete', async (req, res) => {
 });
 
 app.post('/admin/set-star', async (req, res) => {
-  const { cin } = req.body;
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
   await Settings.findOneAndUpdate(
     { key: 'star' },
     { starCin: cin },
@@ -699,20 +696,28 @@ app.post('/admin/add-competition', async (req, res) => {
 });
 
 app.post('/admin/update-rank', async (req, res) => {
-  const { cin, rank } = req.body;
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
+  const { rank } = req.body;
   await User.findOneAndUpdate({ cin }, { rank });
   res.redirect(307, '/admin-dashboard');
 });
 
 app.post('/admin/accept', async (req, res) => {
-  const { cin } = req.body;
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
   await User.findOneAndUpdate({ cin }, { status: 'accepted' });
   res.redirect(307, '/admin-dashboard');
 });
 
+// 🔒 مسار الحذف المصحح: يحذف المستخدم تماماً ويحرر رقم الـ CIN لإعادة التسجيل فوراً
 app.post('/admin/delete', async (req, res) => {
-  const { cin } = req.body;
-  await User.findOneAndDelete({ cin });
+  try {
+    const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
+    if (cin) {
+      await User.findOneAndDelete({ cin });
+    }
+  } catch (err) {
+    console.error(err);
+  }
   res.redirect(307, '/admin-dashboard');
 });
 
