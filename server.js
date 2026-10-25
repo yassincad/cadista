@@ -11,12 +11,12 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 🔒 إعداد الجلسة الأمنية (Session Management)
+// 🔒 إعداد الجلسة الأمنية
 app.use(session({
   secret: 'cad_secret_key_2026_ofppt',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 24 * 60 * 60 * 1000 } // الجلسة صالحة لمدة 24 ساعة
+  cookie: { maxAge: 24 * 60 * 60 * 1000 }
 }));
 
 // 1. الاتصال بقاعدة البيانات MongoDB
@@ -41,7 +41,7 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 
-// Schemas & Models (مع تفعيل trim تلقائياً لـ CIN لضمان نظافة البيانات)
+// Schemas & Models
 const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   cin: { type: String, required: true, unique: true, uppercase: true, trim: true },
@@ -52,7 +52,8 @@ const userSchema = new mongoose.Schema({
   rank: { type: String, default: 'C' },
   skills: [String],
   languages: [String],
-  skillImage: { type: String, default: '' }
+  skillImage: { type: String, default: '' },
+  warnings: [{ text: String, date: { type: Date, default: Date.now } }] // ⚠️ نظام الإنذارات الفردية الخاصة
 });
 
 const complaintSchema = new mongoose.Schema({
@@ -80,11 +81,22 @@ const settingsSchema = new mongoose.Schema({
   starCin: String
 });
 
+// 💡 نموذج صندوق الابتكار والمبادرات
+const initiativeSchema = new mongoose.Schema({
+  senderName: String,
+  senderCin: String,
+  group: String,
+  text: String,
+  status: { type: String, default: 'قيد الدراسة' },
+  date: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Complaint = mongoose.model('Complaint', complaintSchema);
 const Announcement = mongoose.model('Announcement', announcementSchema);
 const Competition = mongoose.model('Competition', competitionSchema);
 const Settings = mongoose.model('Settings', settingsSchema);
+const Initiative = mongoose.model('Initiative', initiativeSchema);
 
 // CSS الموحد
 const commonCSS = `
@@ -151,6 +163,7 @@ app.get('/', (req, res) => {
             <div class="btn-group">
                 <a href="/register" class="btn btn-success">تسجيل متدرب جديد</a>
                 <a href="/login" class="btn">تسجيل الدخول</a>
+                <a href="/skills-directory" class="btn" style="background: var(--accent);">🌐 دليل مهارات المتدربين</a>
                 <a href="/admin-login" class="btn btn-danger">بوابة المشرفين</a>
             </div>
 
@@ -168,7 +181,52 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 2. التسجيل
+// 🌐 2. صفحة دليل مهارات ومشاريع المتدربين
+app.get('/skills-directory', async (req, res) => {
+  const acceptedUsers = await User.find({ status: 'accepted' });
+  res.send(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>دليل مهارات المتدربين</title>
+        ${commonCSS}
+    </head>
+    <body>
+        <div class="container">
+            <h2>🌐 دليل مهارات وخبرات المتدربين</h2>
+            <p style="color: #64748b; margin-bottom: 20px;">تعرف على المهارات التقنية واللغات التي يتقنها زملاؤك في مختلف الشعب والتخصصات.</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>الاسم الكامل</th>
+                        <th>الشعبة / القسم</th>
+                        <th>المهارات التقنية</th>
+                        <th>اللغات المتقنة</th>
+                        <th>ملف أو إنجاز</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${acceptedUsers.length > 0 ? acceptedUsers.map(u => `
+                        <tr>
+                            <td><strong>${u.fullname}</strong></td>
+                            <td>${u.group}</td>
+                            <td>${u.skills && u.skills.length > 0 ? u.skills.join(', ') : '<span style="color:#94a3b8;">غير مسجلة</span>'}</td>
+                            <td>${u.languages && u.languages.length > 0 ? u.languages.join(', ') : '<span style="color:#94a3b8;">غير مسجلة</span>'}</td>
+                            <td>${u.skillImage ? `<a href="${u.skillImage}" target="_blank" style="color:var(--accent); font-weight:bold;">عرض الملف</a>` : '<span style="color:#94a3b8;">لا يوجد</span>'}</td>
+                        </tr>
+                    `).join('') : '<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد بيانات مسجلة حالياً</td></tr>'}
+                </tbody>
+            </table>
+            <p style="text-align:center; margin-top:30px;"><a href="/" class="btn" style="text-decoration:none;">العودة للرئيسية</a></p>
+        </div>
+    </body>
+    </html>
+  `);
+});
+
+// التسجيل
 app.get('/register', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -233,7 +291,7 @@ app.post('/register', upload.single('pnj'), async (req, res) => {
   }
 });
 
-// 3. تسجيل الدخول
+// تسجيل الدخول
 app.get('/login', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -283,7 +341,7 @@ app.post('/login', async (req, res) => {
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// 4. الملف الشخصي للمتدرب
+// 4. الملف الشخصي للمتدرب (مع عرض الإنذارات الخاصة وصندوق الابتكار)
 app.get('/profile', async (req, res) => {
   const cin = req.query.cin ? req.query.cin.trim().toUpperCase() : '';
   const user = await User.findOne({ cin });
@@ -294,6 +352,7 @@ app.get('/profile', async (req, res) => {
   const isStar = settings && settings.starCin === user.cin;
   const competitions = await Competition.find();
   const userComplaints = await Complaint.find({ senderCin: user.cin });
+  const userInitiatives = await Initiative.find({ senderCin: user.cin });
 
   let rankDesc = 'انضباط متوسط';
   let rankColor = '#d97706';
@@ -313,6 +372,7 @@ app.get('/profile', async (req, res) => {
           .profile-header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
           .profile-header h2 { color: white; margin-bottom: 5px; }
           .announcement-box { background: #fffbeb; border-right: 4px solid #f59e0b; color: #92400e; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+          .warning-box { background: #fff1f2; border-right: 4px solid #e11d48; color: #9f1239; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; }
           .star-banner { background: linear-gradient(135deg, #fef08a, #fde047); color: #713f12; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(234, 179, 8, 0.2); }
           .card-section { background: #ffffff; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
           .rank-legend { font-size: 13px; color: #64748b; margin-top: 5px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: inline-block; }
@@ -321,13 +381,26 @@ app.get('/profile', async (req, res) => {
     </head>
     <body>
         <div class="container">
+            <!-- ⚠️ قسم التنبيهات والإنذارات الفردية الخاصة إن وجدت -->
+            ${user.warnings && user.warnings.length > 0 ? `
+                <div class="card-section" style="background: #fff5f5; border-color: #fecaca;">
+                    <h3 style="color: #9f1239; margin-bottom: 15px;">⚠️ تنبيهات وانذارات الإدارة الخاصة</h3>
+                    ${user.warnings.map(w => `
+                        <div class="warning-box">
+                            <div><strong>ملاحظة إدارية:</strong> ${w.text}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+
+            <!-- الإعلانات العامة -->
             ${announcements.length > 0 ? `
                 <div class="card-section" style="background: #fffdf4; border-color: #fef08a;">
                     <h3 style="color: #b45309; margin-bottom: 15px;">📢 لوحة الإعلانات والتنبيهات</h3>
                     ${announcements.map(a => `
                         <div class="announcement-box">
                             <div>🔔 ${a.text}</div>
-                            ${a.image ? `<img src="${a.image}" style="max-width:220px; margin-top:10px; border-radius:8px; display:block; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">` : ''}
+                            ${a.image ? `<img src="${a.image}" style="max-width:220px; margin-top:10px; border-radius:8px; display:block;">` : ''}
                         </div>
                     `).join('')}
                 </div>
@@ -336,6 +409,9 @@ app.get('/profile', async (req, res) => {
             <div class="profile-header">
                 <h2>مرحباً بك، ${user.fullname} 👋</h2>
                 <p style="margin: 5px 0 0; opacity: 0.9;">الشعبة / القسم: <strong>${user.group}</strong></p>
+                <div style="margin-top:15px;">
+                    <a href="/skills-directory" class="btn" style="background: rgba(255,255,255,0.2); border: 1px solid white; padding: 6px 15px; font-size: 13px;">🌐 تصفح دليل مهارات الزملاء</a>
+                </div>
             </div>
 
             ${isStar ? '<div class="star-banner">🌟 تهانينا الحارة! تم اختيارك كنجم الشهر نظيراً لانضباطك وتميزك المستمر!</div>' : ''}
@@ -363,6 +439,29 @@ app.get('/profile', async (req, res) => {
                     <button type="submit" class="btn" style="margin-top: 10px;">حفظ التحديثات</button>
                 </form>
                 ${user.skillImage ? `<div style="margin-top:15px;"><p style="font-size:13px; color:#64748b;">الصورة الحالية:</p><img src="${user.skillImage}" style="max-width:160px; border-radius:8px; border: 1px solid var(--border);"></div>` : ''}
+            </div>
+
+            <!-- 💡 صندوق الابتكار والمبادرات الطلابية -->
+            <div class="card-section">
+                <h3>💡 صندوق الابتكار والمبادرات الطلابية</h3>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">شاركنا بأفكارك الابتكارية أو مقترحاتك لتطوير فضاء المؤسسة أو الأنشطة الموازية.</p>
+                <form action="/add-initiative" method="POST">
+                    <input type="hidden" name="cin" value="${user.cin}">
+                    <textarea name="initiativeText" rows="3" placeholder="اكتب فكرتك أو مقترحك الابتكاري هنا..." required></textarea>
+                    <button type="submit" class="btn btn-success">إرسال المبادرة للإدارة</button>
+                </form>
+
+                <h4 style="margin-top: 20px; border-bottom: 2px solid var(--border); padding-bottom: 8px;">📋 سجل مبادراتك المقترحة:</h4>
+                <div style="margin-top: 15px;">
+                    ${userInitiatives.length > 0 ? userInitiatives.map(i => `
+                        <div class="complaint-item">
+                            <div><strong>${i.text}</strong></div>
+                            <div>
+                                <span class="badge" style="background: #e0f2fe; color: #0284c7;">${i.status}</span>
+                            </div>
+                        </div>
+                    `).join('') : '<p style="color: #64748b; font-size: 14px;">لم تقم بإرسال أي مبادرات بعد.</p>'}
+                </div>
             </div>
 
             <div class="card-section">
@@ -433,7 +532,24 @@ app.post('/add-complaint', async (req, res) => {
   res.send(`<script>alert('تم تقديم الشكاية بنجاح.'); window.location.href='/profile?cin=${cin}';</script>`);
 });
 
-// 5. تسجيل دخول المشرفين
+// إرسال مبادرة جديدة
+app.post('/add-initiative', async (req, res) => {
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
+  const { initiativeText } = req.body;
+  const user = await User.findOne({ cin });
+  if (user) {
+    await Initiative.create({
+      senderName: user.fullname,
+      senderCin: user.cin,
+      group: user.group,
+      text: initiativeText,
+      status: 'قيد الدراسة'
+    });
+  }
+  res.send(`<script>alert('تم إرسال مبادرتك بنجاح للإدارة. شكراً لمساهمتك!'); window.location.href='/profile?cin=${cin}';</script>`);
+});
+
+// تسجيل دخول المشرفين
 app.get('/admin-login', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -459,7 +575,7 @@ app.get('/admin-login', (req, res) => {
   `);
 });
 
-// 6. لوحة تحكم المشرفين
+// لوحة تحكم المشرفين
 app.post('/admin-dashboard', async (req, res) => {
   const { adminPass } = req.body;
   if (adminPass !== 'caddac@2004' && !req.session.isAdmin) {
@@ -471,6 +587,7 @@ app.post('/admin-dashboard', async (req, res) => {
   const complaints = await Complaint.find();
   const announcements = await Announcement.find().sort({ _id: -1 });
   const competitions = await Competition.find();
+  const initiatives = await Initiative.find();
 
   res.send(`
     <!DOCTYPE html>
@@ -491,7 +608,7 @@ app.post('/admin-dashboard', async (req, res) => {
             <h2>🛡️ لوحة التحكم الخاصة بلجنة CAD</h2>
             
             <div class="admin-section">
-                <h3>🔍 البحث السريع عن المتدربين</h3>
+                <h3>🔍 البحث السريع عن المتدربين وإدارة الإنذارات</h3>
                 <div class="search-box">
                     <input type="text" id="searchInput" onkeyup="filterUsers()" placeholder="ابحث باسم المتدرب، رقم CIN، أو الشعبة...">
                 </div>
@@ -503,9 +620,9 @@ app.post('/admin-dashboard', async (req, res) => {
                             <th>الاسم الكامل</th>
                             <th>CIN</th>
                             <th>الشعبة</th>
-                            <th>صورة المتدرب</th>
-                            <th>الحالة</th>
-                            <th>الرتبة</th>
+                            <th>الملف</th>
+                            <th>الحالة والرتبة</th>
+                            <th>إرسال تنبيه خاص</th>
                             <th>الإجراءات</th>
                         </tr>
                     </thead>
@@ -515,17 +632,24 @@ app.post('/admin-dashboard', async (req, res) => {
                                 <td class="user-name">${u.fullname}</td>
                                 <td class="user-cin">${u.cin}</td>
                                 <td class="user-group">${u.group}</td>
-                                <td>${u.pnj ? `<a href="${u.pnj}" target="_blank" style="color:var(--accent);">عرض الملف</a>` : 'لا يوجد'}</td>
-                                <td>${u.status === 'pending' ? '<span style="color:#d97706; font-weight:bold;">قيد الانتظار</span>' : '<span style="color:#059669; font-weight:bold;">مقبول</span>'}</td>
+                                <td>${u.pnj ? `<a href="${u.pnj}" target="_blank" style="color:var(--accent);">عرض</a>` : 'لا يوجد'}</td>
                                 <td>
-                                    <form action="/admin/update-rank" method="POST" style="margin:0;">
+                                    ${u.status === 'pending' ? '<span style="color:#d97706; font-weight:bold;">قيد الانتظار</span>' : '<span style="color:#059669; font-weight:bold;">مقبول</span>'}
+                                    <form action="/admin/update-rank" method="POST" style="margin-top:5px;">
                                         <input type="hidden" name="cin" value="${u.cin}">
-                                        <select name="rank" onchange="this.form.submit()" style="margin:0; padding:4px;">
+                                        <select name="rank" onchange="this.form.submit()" style="margin:0; padding:2px; font-size:12px;">
                                             <option value="A" ${u.rank==='A'?'selected':''}>A</option>
                                             <option value="B" ${u.rank==='B'?'selected':''}>B</option>
                                             <option value="C" ${u.rank==='C'?'selected':''}>C</option>
                                             <option value="D" ${u.rank==='D'?'selected':''}>D</option>
                                         </select>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="/admin/add-warning" method="POST" style="display:flex; gap:5px; margin:0;">
+                                        <input type="hidden" name="cin" value="${u.cin}">
+                                        <input type="text" name="warningText" placeholder="اكتب الإنذار..." required style="margin:0; padding:4px; font-size:12px;">
+                                        <button type="submit" class="btn btn-danger" style="padding:4px 8px; font-size:11px;">إرسال</button>
                                     </form>
                                 </td>
                                 <td>
@@ -598,6 +722,42 @@ app.post('/admin-dashboard', async (req, res) => {
                     <input type="text" name="result" placeholder="النتيجة أو الفائز..." required>
                     <button type="submit" class="btn">إضافة / تحديث المسابقة</button>
                 </form>
+            </div>
+
+            <!-- 💡 إدارة صندوق الابتكار والمبادرات -->
+            <div class="admin-section">
+                <h3>💡 صندوق الابتكار والمبادرات الواردة</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>المتدرب</th>
+                            <th>الشعبة</th>
+                            <th>المبادرة / المقترح</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${initiatives.length > 0 ? initiatives.map(i => `
+                            <tr>
+                                <td>${i.senderName} (${i.senderCin})</td>
+                                <td>${i.group}</td>
+                                <td>${i.text}</td>
+                                <td><span style="color:#0284c7; font-weight:bold;">${i.status}</span></td>
+                                <td>
+                                    <form action="/admin/initiative/review" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id" value="${i._id}">
+                                        <button type="submit" class="btn btn-success" style="padding:4px 8px; font-size:12px;">قبول ودراسة</button>
+                                    </form>
+                                    <form action="/admin/initiative/delete" method="POST" style="display:inline;">
+                                        <input type="hidden" name="id" value="${i._id}">
+                                        <button type="submit" class="btn btn-danger" style="padding:4px 8px; font-size:12px;">حذف</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد مبادرات واردة حالياً</td></tr>'}
+                    </tbody>
+                </table>
             </div>
 
             <div class="admin-section">
@@ -702,13 +862,25 @@ app.post('/admin/update-rank', async (req, res) => {
   res.redirect(307, '/admin-dashboard');
 });
 
+// ⚠️ إرسال إنذار أو تنبيه خاص لمتدرب
+app.post('/admin/add-warning', async (req, res) => {
+  const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
+  const { warningText } = req.body;
+  if (cin && warningText) {
+    await User.findOneAndUpdate(
+      { cin },
+      { $push: { warnings: { text: warningText, date: new Date() } } }
+    );
+  }
+  res.redirect(307, '/admin-dashboard');
+});
+
 app.post('/admin/accept', async (req, res) => {
   const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
   await User.findOneAndUpdate({ cin }, { status: 'accepted' });
   res.redirect(307, '/admin-dashboard');
 });
 
-// 🔒 مسار الحذف المصحح: يحذف المستخدم تماماً ويحرر رقم الـ CIN لإعادة التسجيل فوراً
 app.post('/admin/delete', async (req, res) => {
   try {
     const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
@@ -730,6 +902,19 @@ app.post('/admin/complaint/review', async (req, res) => {
 app.post('/admin/complaint/delete', async (req, res) => {
   const { id } = req.body;
   await Complaint.findByIdAndDelete(id);
+  res.redirect(307, '/admin-dashboard');
+});
+
+// مراجعة أو حذف المبادرات
+app.post('/admin/initiative/review', async (req, res) => {
+  const { id } = req.body;
+  await Initiative.findByIdAndUpdate(id, { status: 'تم قبول المبادرة ودراستها' });
+  res.redirect(307, '/admin-dashboard');
+});
+
+app.post('/admin/initiative/delete', async (req, res) => {
+  const { id } = req.body;
+  await Initiative.findByIdAndDelete(id);
   res.redirect(307, '/admin-dashboard');
 });
 
