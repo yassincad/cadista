@@ -1036,7 +1036,7 @@ app.post('/admin/initiative/review', async (req, res) => {
 });
 
 app.post('/admin/initiative/delete', async (req, res) => {
-  const { id => id } = req.body;
+  const { id } = req.body;
   await Initiative.findByIdAndDelete(id);
   res.redirect(307, '/admin-dashboard');
 });
