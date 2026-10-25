@@ -131,7 +131,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الرئيسية الجديدة المطابقة للتصميم المطلوب
+// 1. الواجهة الرئيسية الاحترافية المطابقة تماماً للتصميم المطلوب
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -144,60 +144,85 @@ app.get('/', async (req, res) => {
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
         <style>
           * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-          body { background-color: #0b192c; color: #ffffff; direction: rtl; }
+          body { background-color: #0b192c; color: #ffffff; direction: rtl; overflow-x: hidden; }
           
-          /* شريط التنقل العلوي */
-          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: rgba(11, 25, 44, 0.95); border-bottom: 1px solid rgba(255,255,255,0.1); }
-          .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 22px; color: #ffffff; }
-          .nav-links { display: flex; gap: 25px; align-items: center; }
-          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; transition: 0.2s; }
+          /* شريط التنقل العلوي الاحترافي */
+          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 5%; background: #07111e; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000; }
+          .logo-area { display: flex; flex-direction: column; align-items: flex-end; }
+          .logo-main { font-weight: 800; font-size: 26px; color: #ffffff; letter-spacing: 1px; }
+          .logo-sub { font-size: 10px; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; }
+          
+          .nav-links { display: flex; gap: 30px; align-items: center; }
+          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; }
           .nav-links a:hover, .nav-links a.active { color: #38bdf8; }
-          .admin-btn { background: #0D9488; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+          
+          .admin-btn { background: #0D9488; color: white; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+          .admin-btn:hover { background: #0f766e; }
 
-          /* القسم الرئيسي (Hero) */
-          .hero-section { position: relative; background: linear-gradient(135deg, #0b192c 0%, #1e3e62 100%); padding: 60px 5%; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 40px; border-bottom: 4px solid #0D9488; }
-          .hero-content { max-width: 600px; }
-          .welcome-badge { color: #38bdf8; font-weight: 700; margin-bottom: 15px; display: inline-block; font-size: 16px; }
-          .hero-content h1 { font-size: 3rem; font-weight: 800; line-height: 1.2; margin-bottom: 15px; color: #ffffff; }
-          .hero-content p { color: #94a3b8; font-size: 1.1rem; margin-bottom: 30px; line-height: 1.6; }
+          /* القسم الرئيسي (Hero) مع الخلفية الاحترافية والتدرج */
+          .hero-section { 
+            position: relative; 
+            background: linear-gradient(90deg, rgba(7, 17, 30, 0.96) 0%, rgba(11, 25, 44, 0.85) 60%, rgba(11, 25, 44, 0.6) 100%), 
+                        url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; 
+            padding: 90px 5%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            flex-wrap: wrap; 
+            gap: 40px; 
+            border-bottom: 4px solid #0D9488; 
+          }
+          .hero-content { max-width: 650px; }
+          .welcome-badge { color: #38bdf8; font-weight: 700; margin-bottom: 12px; display: inline-block; font-size: 16px; background: rgba(56, 189, 248, 0.1); padding: 5px 12px; border-radius: 6px; }
+          .hero-content h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 15px; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+          .hero-content p { color: #cbd5e1; font-size: 1.15rem; margin-bottom: 35px; line-height: 1.7; }
+          
           .hero-btns { display: flex; gap: 15px; flex-wrap: wrap; }
-          .btn-main { background: #0D9488; color: white; padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 4px 15px rgba(13, 148, 136, 0.4); transition: 0.2s; }
+          .btn-main { background: #0D9488; color: white; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4); transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 16px; }
           .btn-main:hover { background: #0f766e; transform: translateY(-2px); }
-          .btn-outline { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 14px 28px; border-radius: 10px; text-decoration: none; font-weight: 700; transition: 0.2s; }
-          .btn-outline:hover { background: rgba(255,255,255,0.15); }
+          .btn-outline { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.25); padding: 14px 30px; border-radius: 10px; text-decoration: none; font-weight: 700; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 16px; }
+          .btn-outline:hover { background: rgba(255,255,255,0.18); }
 
-          /* بطاقة الإحصائيات الجانبية */
-          .stats-card { background: #112238; border: 1px solid rgba(255,255,255,0.1); padding: 30px; border-radius: 16px; text-align: center; min-width: 260px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-          .stats-number { font-size: 3.5rem; font-weight: 800; color: #38bdf8; margin: 10px 0; }
-          .stats-label { color: #94a3b8; font-size: 1rem; font-weight: 600; }
+          /* بطاقة الإحصائيات الفاخرة */
+          .stats-card { background: rgba(17, 34, 56, 0.9); border: 1px solid rgba(255,255,255,0.12); padding: 35px 45px; border-radius: 18px; text-align: center; min-width: 280px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+          .stats-icon { font-size: 32px; color: #38bdf8; margin-bottom: 5px; }
+          .stats-number { font-size: 4rem; font-weight: 800; color: #38bdf8; line-height: 1.1; margin: 10px 0; }
+          .stats-label { color: #94a3b8; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; }
 
           /* قسم ما هي لجنة الانضباط */
-          .about-section { background: #ffffff; color: #1e293b; padding: 70px 5%; text-align: center; }
-          .section-title { font-size: 2.2rem; color: #0b192c; font-weight: 800; margin-bottom: 15px; }
-          .section-desc { max-width: 700px; margin: 0 auto 50px; color: #64748b; font-size: 1.1rem; line-height: 1.7; }
-          .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
-          .feature-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 30px 20px; border-radius: 12px; transition: 0.3s; }
-          .feature-box:hover { transform: translateY(-5px); border-color: #0D9488; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-          .feature-box h4 { color: #0b192c; font-size: 1.2rem; margin-bottom: 10px; }
-          .feature-box p { color: #64748b; font-size: 0.95rem; }
-          .tagline { font-size: 1.5rem; color: #0D9488; font-weight: 700; margin-top: 30px; }
+          .about-section { background: #ffffff; color: #1e293b; padding: 80px 5%; text-align: center; }
+          .section-title { font-size: 2.4rem; color: #0b192c; font-weight: 800; margin-bottom: 15px; }
+          .section-desc { max-width: 750px; margin: 0 auto 55px; color: #64748b; font-size: 1.15rem; line-height: 1.8; }
+          
+          .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 50px; }
+          .feature-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 35px 25px; border-radius: 14px; transition: 0.3s; text-align: right; }
+          .feature-box:hover { transform: translateY(-6px); border-color: #0D9488; box-shadow: 0 12px 25px rgba(0,0,0,0.06); background: #ffffff; }
+          .feature-box h4 { color: #0b192c; font-size: 1.25rem; margin-bottom: 12px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+          .feature-box p { color: #64748b; font-size: 1rem; line-height: 1.6; }
+          .tagline { font-size: 1.6rem; color: #0D9488; font-weight: 800; letter-spacing: 1px; margin-top: 20px; }
 
-          /* قسم القوانين والمعايير */
-          .rules-section { background: #07111e; padding: 70px 5%; color: white; }
-          .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 40px; }
-          .rule-card { background: #112238; border: 1px solid rgba(255,255,255,0.08); padding: 25px; border-radius: 12px; display: flex; align-items: flex-start; gap: 15px; }
-          .rule-icon { color: #0D9488; font-size: 24px; font-weight: bold; background: rgba(13, 148, 136, 0.1); width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
-          .rule-text { font-size: 1rem; color: #cbd5e1; line-height: 1.6; }
+          /* قسم القوانين والمعايير التسعة المطابقة تماماً */
+          .rules-section { background: #07111e; padding: 80px 5%; color: white; }
+          .rules-header { text-align: center; max-width: 700px; margin: 0 auto 50px; }
+          .rules-header h2 { color: white; font-size: 2.4rem; margin-bottom: 12px; font-weight: 800; }
+          .rules-header p { color: #94a3b8; font-size: 1.1rem; }
+          
+          .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+          .rule-card { background: #112238; border: 1px solid rgba(255,255,255,0.08); padding: 22px 25px; border-radius: 12px; display: flex; align-items: center; gap: 20px; transition: 0.2s; }
+          .rule-card:hover { border-color: #0D9488; background: #162b48; }
+          .rule-icon { color: #38bdf8; font-size: 18px; font-weight: 800; background: rgba(56, 189, 248, 0.12); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
+          .rule-text { font-size: 1.02rem; color: #cbd5e1; line-height: 1.6; font-weight: 600; }
 
-          footer { background: #050d18; text-align: center; padding: 25px; color: #64748b; font-size: 0.9rem; border-top: 1px solid rgba(255,255,255,0.05); }
+          footer { background: #040910; text-align: center; padding: 30px; color: #64748b; font-size: 0.95rem; border-top: 1px solid rgba(255,255,255,0.05); }
         </style>
     </head>
     <body>
 
-        <!-- شريط التنقل -->
+        <!-- شريط التنقل الاحترافي -->
         <div class="navbar">
             <div class="logo-area">
-                <span>CAD • OFPPT</span>
+                <div class="logo-main">CAD • OFPPT</div>
+                <div class="logo-sub">COMITÉ D'AUTODISCIPLINE</div>
             </div>
             <div class="nav-links">
                 <a href="/" class="active">الرئيسية</a>
@@ -215,12 +240,12 @@ app.get('/', async (req, res) => {
                 <h1>لجنة الانضباط الذاتية (CAD)</h1>
                 <p>معاً من أجل بيئة تكوينية أفضل في مؤسسة التكوين المهني و إنعاش الشغل OFPPT.</p>
                 <div class="hero-btns">
-                    <a href="/register" class="btn-main">تسجيل جديد</a>
-                    <a href="/login" class="btn-outline">تسجيل الدخول</a>
+                    <a href="/register" class="btn-main">➕ تسجيل جديد</a>
+                    <a href="/login" class="btn-outline">🔑 تسجيل الدخول</a>
                 </div>
             </div>
             <div class="stats-card">
-                <div style="font-size: 28px;">👥</div>
+                <div class="stats-icon">👥</div>
                 <div class="stats-number">${acceptedCount}</div>
                 <div class="stats-label">عدد المتدربين المسجلين</div>
             </div>
@@ -234,29 +259,31 @@ app.get('/', async (req, res) => {
             <div class="features-grid">
                 <div class="feature-box">
                     <h4>🤝 معاً نحو مستقبل أفضل</h4>
-                    <p>بناء جسد طلابي واعي ومسؤول.</p>
+                    <p>بناء جسد طلابي واعي ومسؤول يخدم مسيرتك المهنية.</p>
                 </div>
                 <div class="feature-box">
                     <h4>📈 التطوير والاقتراحات</h4>
-                    <p>تطوير المهارات والمقترحات الابتكارية.</p>
+                    <p>تطوير المهارات والابتكار واستقبال الأفكار الإيجابية.</p>
                 </div>
                 <div class="feature-box">
                     <h4>👥 تمثيل المتدربين والمرافقة</h4>
-                    <p>دعم المتدربين وسماع شكاياتهم.</p>
+                    <p>دعم المتدربين وسماع شكاياتهم ومرافقتهم طيلة تكوينهم.</p>
                 </div>
                 <div class="feature-box">
                     <h4>🛡️ الانضباط والاحترام</h4>
-                    <p>الالتزام باللوائح والقوانين الداخلية.</p>
+                    <p>الالتزام باللوائح الداخلية وقواعد الاحترام المتبادل.</p>
                 </div>
             </div>
 
-            <div class="tagline">انضباطك ... نجاحك</div>
+            <div class="tagline">✨ انضباطك ... نجاحك ✨</div>
         </div>
 
-        <!-- قسم القوانين والمعايير الدقيقة المطلوبة -->
+        <!-- قسم القوانين والمعايير التسعة المطلوبة بدقة -->
         <div class="rules-section" id="rules">
-            <h2 style="color: white; font-size: 2.2rem; text-align: center; margin-bottom: 10px;">القوانين والمعايير</h2>
-            <p style="color: #94a3b8; text-align: center; margin-bottom: 30px;">احترام هذه القوانين مسؤوليتك جميعاً من أجل بيئة تكوينية منظمة وآمنة.</p>
+            <div class="rules-header">
+                <h2>القوانين والمعايير</h2>
+                <p>احترام هذه القوانين مسؤوليتكم جميعاً من أجل بيئة تكوينية منظمة وآمنة.</p>
+            </div>
             
             <div class="rules-grid">
                 <div class="rule-card">
@@ -307,7 +334,7 @@ app.get('/', async (req, res) => {
   `);
 });
 
-// 🔒 2. صفحة دليل مهارات المتدربين (متاحة حصراً للمشرفين)
+// باقي المسارات والروابط البرمجية (المتدربين، المشرفين، الإنذارات، الحذف، الخ...)
 app.get('/skills-directory', async (req, res) => {
   if (!req.session.isAdmin) {
     return res.redirect('/admin-login');
@@ -355,7 +382,6 @@ app.get('/skills-directory', async (req, res) => {
   `);
 });
 
-// التسجيل
 app.get('/register', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -420,7 +446,6 @@ app.post('/register', upload.single('pnj'), async (req, res) => {
   }
 });
 
-// تسجيل الدخول
 app.get('/login', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -470,7 +495,6 @@ app.post('/login', async (req, res) => {
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// الملف الشخصي للمتدرب
 app.get('/profile', async (req, res) => {
   const cin = req.query.cin ? req.query.cin.trim().toUpperCase() : '';
   const user = await User.findOne({ cin });
