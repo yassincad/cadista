@@ -4,12 +4,22 @@ const multer = require('multer');
 const { v2: cloudinary } = require('cloudinary');
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const path = require('path');
+const bcrypt = require('bcryptjs'); // 🔒 مكتبة تشفير كلمات المرور
+const session = require('express-session'); // 🔒 مكتبة إدارة الجلسات
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// 1. إعدادات الاتصال بقاعدة بيانات MongoDB
+// 🔒 إعداد الجلسة الأمنية (Session Management)
+app.use(session({
+  secret: 'cad_secret_key_2026_ofppt',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 24 * 60 * 60 * 1000 } // الجلسة صالحة لمدة 24 ساعة
+}));
+
+// 1. الاتصال بقاعدة البيانات MongoDB
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/cad_ofppt';
 mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ تم الاتصال بقاعدة بيانات MongoDB بنجاح'))
@@ -31,13 +41,13 @@ const storage = new CloudinaryStorage({
 });
 const upload = multer({ storage: storage });
 
-// تعريف Schemas ونماذج البيانات (Models)
+// Schemas & Models
 const userSchema = new mongoose.Schema({
   fullname: { type: String, required: true },
   cin: { type: String, required: true, unique: true, uppercase: true },
   pnj: { type: String, required: true },
   group: { type: String, required: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true }, // ستحفظ مشفرة الآن
   status: { type: String, default: 'pending' },
   rank: { type: String, default: 'C' },
   skills: [String],
@@ -76,7 +86,7 @@ const Announcement = mongoose.model('Announcement', announcementSchema);
 const Competition = mongoose.model('Competition', competitionSchema);
 const Settings = mongoose.model('Settings', settingsSchema);
 
-// تنسيقات CSS الموحدة للتطبيق
+// CSS الموحد
 const commonCSS = `
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -111,7 +121,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الصفحة الرئيسية مع الشعار الجديد
+// 1. الرئيسية
 app.get('/', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -158,7 +168,7 @@ app.get('/', (req, res) => {
   `);
 });
 
-// 2. صفحة التسجيل
+// 2. التسجيل مع تشفير كلمة المرور
 app.get('/register', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -202,12 +212,15 @@ app.post('/register', upload.single('pnj'), async (req, res) => {
     const { fullname, cin, group, password } = req.body;
     const fileUrl = req.file ? req.file.path : '';
     
+    // 🔒 تشفير كلمة المرور
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
     await User.create({
       fullname,
       cin: cin.trim().toUpperCase(),
       pnj: fileUrl,
       group,
-      password
+      password: hashedPassword
     });
     
     res.send(`<script>alert('تم إرسال طلبك بنجاح! سيتم مراجعته من طرف المشرفين.'); window.location.href='/';</script>`);
@@ -216,7 +229,7 @@ app.post('/register', upload.single('pnj'), async (req, res) => {
   }
 });
 
-// 3. صفحة تسجيل الدخول
+// 3. تسجيل الدخول مع مقارنة التشفير
 app.get('/login', (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -248,19 +261,26 @@ app.post('/login', async (req, res) => {
   const cin = req.body.cin ? req.body.cin.trim().toUpperCase() : '';
   const { password } = req.body;
   
-  const user = await User.findOne({ cin, password });
-  
+  const user = await User.findOne({ cin });
   if (!user) {
     return res.send(`<script>alert('بيانات الدخول غير صحيحة!'); window.location.href='/login';</script>`);
   }
+
+  // 🔒 فك تشفير وفحص كلمة المرور
+  const isMatch = await bcrypt.compare(password, user.password).catch(() => password === user.password);
+  if (!isMatch) {
+    return res.send(`<script>alert('بيانات الدخول غير صحيحة!'); window.location.href='/login';</script>`);
+  }
+
   if (user.status !== 'accepted') {
     return res.send(`<script>alert('حسابك قيد المراجعة ولم يتم قبوله بعد.'); window.location.href='/';</script>`);
   }
 
+  req.session.userCin = cin;
   res.redirect(`/profile?cin=${cin}`);
 });
 
-// 4. ملف المتدرب الشخصي (مع عرض جميع الإعلانات المنشورة)
+// 4. ملف المتدرب
 app.get('/profile', async (req, res) => {
   const { cin } = req.query;
   const user = await User.findOne({ cin });
@@ -288,7 +308,6 @@ app.get('/profile', async (req, res) => {
     </head>
     <body>
         <div class="container">
-            <!-- عرض الإعلانات -->
             <div class="card-section" style="background: #fffbeb; border-color: #fde68a;">
                 <h3>📢 الإعلانات والتنبيهات الهامة</h3>
                 ${announcements.length > 0 ? announcements.map(a => `
@@ -411,12 +430,13 @@ app.get('/admin-login', (req, res) => {
   `);
 });
 
-// 6. لوحة تحكم المشرفين مع إدارة الإعلانات والشكايات
+// 6. لوحة تحكم المشرفين
 app.post('/admin-dashboard', async (req, res) => {
   const { adminPass } = req.body;
-  if (adminPass !== 'caddac@2004') {
+  if (adminPass !== 'caddac@2004' && !req.session.isAdmin) {
     return res.send(`<script>alert('كلمة المرور غير صحيحة!'); window.location.href='/admin-login';</script>`);
   }
+  req.session.isAdmin = true;
 
   const users = await User.find();
   const complaints = await Complaint.find();
@@ -470,7 +490,6 @@ app.post('/admin-dashboard', async (req, res) => {
                                 <td>${u.status === 'pending' ? '<span style="color:#d97706; font-weight:bold;">قيد الانتظار</span>' : '<span style="color:#059669; font-weight:bold;">مقبول</span>'}</td>
                                 <td>
                                     <form action="/admin/update-rank" method="POST" style="margin:0;">
-                                        <input type="hidden" name="adminPass" value="cad2026">
                                         <input type="hidden" name="cin" value="${u.cin}">
                                         <select name="rank" onchange="this.form.submit()" style="margin:0; padding:4px;">
                                             <option value="A" ${u.rank==='A'?'selected':''}>A</option>
@@ -483,13 +502,11 @@ app.post('/admin-dashboard', async (req, res) => {
                                 <td>
                                     ${u.status === 'pending' ? `
                                         <form action="/admin/accept" method="POST" style="display:inline;">
-                                            <input type="hidden" name="adminPass" value="cad2026">
                                             <input type="hidden" name="cin" value="${u.cin}">
                                             <button type="submit" class="btn btn-success" style="padding:4px 8px; font-size:12px;">قبول</button>
                                         </form>
                                     ` : ''}
                                     <form action="/admin/delete" method="POST" style="display:inline;">
-                                        <input type="hidden" name="adminPass" value="cad2026">
                                         <input type="hidden" name="cin" value="${u.cin}">
                                         <button type="submit" class="btn btn-danger" style="padding:4px 8px; font-size:12px;">حذف</button>
                                     </form>
@@ -504,7 +521,6 @@ app.post('/admin-dashboard', async (req, res) => {
             <div class="admin-section">
                 <h3>📢 نشر وإدارة الإعلانات</h3>
                 <form action="/admin/add-announcement" method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="adminPass" value="cad2026">
                     <textarea name="text" placeholder="اكتب نص الإعلان هنا..." required></textarea>
                     <label>صورة مرفقة بالإعلان (اختياري):</label>
                     <input type="file" name="annImage" accept="image/*">
@@ -540,7 +556,6 @@ app.post('/admin-dashboard', async (req, res) => {
             <div class="admin-section">
                 <h3>⭐ اختيار نجم الشهر</h3>
                 <form action="/admin/set-star" method="POST">
-                    <input type="hidden" name="adminPass" value="cad2026">
                     <select name="cin">
                         ${users.filter(u => u.status === 'accepted').map(u => `<option value="${u.cin}">${u.fullname} - (${u.group})</option>`).join('')}
                     </select>
@@ -551,14 +566,12 @@ app.post('/admin-dashboard', async (req, res) => {
             <div class="admin-section">
                 <h3>🏆 إدارة المسابقات</h3>
                 <form action="/admin/add-competition" method="POST">
-                    <input type="hidden" name="adminPass" value="cad2026">
                     <input type="text" name="title" placeholder="اسم المسابقة..." required>
                     <input type="text" name="result" placeholder="النتيجة أو الفائز..." required>
                     <button type="submit" class="btn">إضافة / تحديث المسابقة</button>
                 </form>
             </div>
 
-            <!-- الشكايات -->
             <div class="admin-section">
                 <h3>📩 الشكايات والملاحظات الواردة</h3>
                 <table>
@@ -622,7 +635,7 @@ app.post('/admin-dashboard', async (req, res) => {
   `);
 });
 
-// المسارات الخاصة بالإعلانات والشكايات والتحكم
+// المسارات والإجراءات
 app.post('/admin/add-announcement', upload.single('annImage'), async (req, res) => {
   const { text } = req.body;
   await Announcement.create({
@@ -632,7 +645,6 @@ app.post('/admin/add-announcement', upload.single('annImage'), async (req, res) 
   res.redirect(307, '/admin-dashboard');
 });
 
-// مسار حذف إعلان
 app.post('/admin/announcement/delete', async (req, res) => {
   const { id } = req.body;
   await Announcement.findByIdAndDelete(id);
