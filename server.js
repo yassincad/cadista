@@ -131,7 +131,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الرئيسية المطابقة تماماً للصورة الاحترافية الثانية
+// 1. الرئيسية مع الشعارات العلوية الاحترافية
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -147,12 +147,9 @@ app.get('/', async (req, res) => {
           * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
           body { background-color: #07111e; color: #ffffff; direction: rtl; overflow-x: hidden; }
 
-          /* شريط التنقل العلوي */
-          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 5%; background: #07111e; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000; }
-          .nav-logos { display: flex; align-items: center; gap: 20px; }
-          .cad-logo-text { font-weight: 800; font-size: 20px; color: #ffffff; border-right: 2px solid rgba(255,255,255,0.2); padding-right: 15px; }
-          .ofppt-logo-text { color: #38bdf8; font-weight: 700; font-size: 15px; }
-
+          /* شريط التنقل العلوي مع الشعارات المطلوبة */
+          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: #07111e; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000; }
+          
           .nav-links { display: flex; gap: 25px; align-items: center; }
           .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
           .nav-links a:hover, .nav-links a.active { color: #0D9488; }
@@ -161,7 +158,17 @@ app.get('/', async (req, res) => {
           .btn-login-nav { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
           .btn-register-nav { background: #0D9488; color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
 
-          /* القسم الرئيسي (Hero) المطابق للصورة تماماً */
+          /* تنسيق الشعارات في أعلى اليمين (حسب الصورة المرفقة) */
+          .top-brand-logos { display: flex; align-items: center; gap: 15px; }
+          .cad-brand-logo { height: 40px; width: auto; filter: drop-shadow(0 0 8px rgba(13,148,136,0.3)); }
+          .brand-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.2); }
+          .ofppt-brand-group { display: flex; align-items: center; gap: 10px; text-align: left; }
+          .ofppt-brand-shapes { display: flex; gap: 3px; }
+          .ofppt-brand-shapes span { width: 10px; height: 18px; background: #38bdf8; transform: skewX(-20deg); display: inline-block; }
+          .ofppt-brand-shapes span:nth-child(2) { background: #0D9488; }
+          .ofppt-brand-text { font-size: 11px; font-weight: 700; color: #cbd5e1; line-height: 1.2; text-align: right; }
+
+          /* القسم الرئيسي (Hero) */
           .hero-section { 
             position: relative; 
             background: linear-gradient(135deg, rgba(7, 17, 30, 0.95) 0%, rgba(11, 25, 44, 0.9) 100%), 
@@ -179,8 +186,6 @@ app.get('/', async (req, res) => {
           .stat-box-left .num { font-size: 3.5rem; font-weight: 800; color: #0D9488; margin: 5px 0; }
           
           .hero-center-badge { text-align: center; flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
-          
-          /* إزالة الخلفية البيضاء للشعار ودمجه باحترافية تامة */
           .cad-logo-img { 
             max-width: 260px; 
             height: auto; 
@@ -241,21 +246,34 @@ app.get('/', async (req, res) => {
     </head>
     <body>
 
-        <!-- شريط التنقل العلوي -->
+        <!-- شريط التنقل العلوي مع شعارات CAD و OFPPT المطابقة تماماً للصورة -->
         <div class="navbar">
-            <div class="nav-logos">
-                <div class="cad-logo-text">CAD • OFPPT</div>
-                <div class="ofppt-logo-text"><i class="fa-solid fa-graduation-cap"></i> مكتب التكوين المهني وإنعاش الشغل</div>
-            </div>
             <div class="nav-links">
                 <a href="/" class="active"><i class="fa-solid fa-house"></i> الرئيسية</a>
                 <a href="#rules"><i class="fa-solid fa-book"></i> القوانين والمعايير</a>
                 <a href="mailto:yassine.iizo3@gmail.com"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
                 <a href="/register"><i class="fa-solid fa-user-plus"></i> التسجيل</a>
             </div>
+
             <div class="nav-right-btns">
                 <a href="/login" class="btn-login-nav">تسجيل الدخول</a>
                 <a href="/admin-login" class="btn-register-nav"><i class="fa-solid fa-user-shield"></i> دخول المشرفين</a>
+            </div>
+
+            <!-- الشعارات في الأعلى (يمين الصفحة) -->
+            <div class="top-brand-logos">
+                <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار CAD" class="cad-brand-logo">
+                <div class="brand-divider"></div>
+                <div class="ofppt-brand-group">
+                    <div class="ofppt-brand-text">
+                        OFPPT<br>
+                        <span style="font-size:8px; color:#94a3b8; font-weight:normal;">مكتب التكوين المهني وإنعاش الشغل</span>
+                    </div>
+                    <div class="ofppt-brand-shapes">
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
             </div>
         </div>
 
