@@ -131,7 +131,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الرئيسية مع صورة الشعار الرسمية الجديدة بدلاً من الدائرة
+// 1. الرئيسية مع دمج الشعار باحترافية تامة
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -178,9 +178,23 @@ app.get('/', async (req, res) => {
           .stat-box-left { background: #112238; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; text-align: center; min-width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
           .stat-box-left .num { font-size: 3.5rem; font-weight: 800; color: #0D9488; margin: 5px 0; }
           
-          .hero-center-badge { text-align: center; flex: 1; min-width: 300px; display: flex; justify-content: center; align-items: center; }
-          .cad-logo-img { max-width: 260px; height: auto; border-radius: 16px; background: rgba(255,255,255,0.95); padding: 15px 25px; box-shadow: 0 0 35px rgba(13, 148, 136, 0.35); transition: transform 0.3s ease; }
-          .cad-logo-img:hover { transform: scale(1.03); }
+          .hero-center-badge { text-align: center; flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
+          
+          /* تحسين مظهر الشعار ليكون مندمجاً واحترافياً بدون خلفية بيضاء صلبة نشاز */
+          .cad-logo-img { 
+            max-width: 280px; 
+            height: auto; 
+            border-radius: 14px; 
+            background: transparent; 
+            padding: 10px; 
+            filter: drop-shadow(0 0 20px rgba(13, 148, 136, 0.4));
+            mix-blend-mode: luminosity;
+            transition: 0.3s ease;
+          }
+          .cad-logo-img:hover {
+            mix-blend-mode: normal;
+            transform: scale(1.03);
+          }
 
           .hero-text-right { max-width: 450px; text-align: right; }
           .hero-text-right h3 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 8px; }
@@ -250,7 +264,7 @@ app.get('/', async (req, res) => {
             </div>
         </div>
 
-        <!-- القسم الرئيسي (Hero) مع صورة الشعار الرسمية بدلاً من الدائرة -->
+        <!-- القسم الرئيسي (Hero) مع دمج الشعار باحترافية -->
         <div class="hero-section">
             <!-- يسار: عدد المسجلين -->
             <div class="stat-box-left">
@@ -259,9 +273,9 @@ app.get('/', async (req, res) => {
                 <div class="num">${acceptedCount}</div>
             </div>
 
-            <!-- المنتصف: صورة شعار CAD الرسمية -->
+            <!-- المنتصف: شعار CAD مندمج واحترافي -->
             <div class="hero-center-badge">
-                <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="cad-logo-img" onerror="this.onerror=null; this.src='https://i.imgur.com/7kX1g6u.png';">
+                <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="cad-logo-img">
             </div>
 
             <!-- يمين: الترحيب والأزرار -->
