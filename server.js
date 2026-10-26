@@ -102,36 +102,36 @@ const commonCSS = `
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #0b192c;
-      --primary-light: #1e3e62;
+      --primary: #07111e;
+      --primary-light: #0f1f38;
       --accent: #0D9488;
-      --bg: #f8fafc;
-      --card-bg: #ffffff;
-      --text: #1e293b;
-      --border: #e2e8f0;
+      --bg: #07111e;
+      --card-bg: #112238;
+      --text: #ffffff;
+      --border: rgba(255,255,255,0.1);
     }
     * { box-sizing: border-box; font-family: 'Cairo', sans-serif; }
     body { background-color: var(--bg); color: var(--text); margin: 0; padding: 0; direction: rtl; }
-    .container { max-width: 1100px; margin: 20px auto; background: var(--card-bg); padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); }
-    h1, h2, h3 { color: var(--primary); margin-top: 0; font-weight: 700; }
-    .btn { display: inline-block; background: var(--primary); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s ease; text-align: center; }
-    .btn:hover { background: var(--primary-light); transform: translateY(-2px); }
+    .container { max-width: 1100px; margin: 20px auto; background: var(--card-bg); padding: 30px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
+    h1, h2, h3 { color: var(--text); margin-top: 0; font-weight: 700; }
+    .btn { display: inline-block; background: var(--accent); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+    .btn:hover { background: #0f766e; transform: translateY(-2px); }
     .btn-danger { background: #e11d48; }
     .btn-danger:hover { background: #be123c; }
     .btn-success { background: #10b981; }
     .btn-success:hover { background: #059669; }
-    input, select, textarea { width: 100%; padding: 12px; margin: 8px 0 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #f8fafc; transition: 0.2s; }
-    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: white; }
+    input, select, textarea { width: 100%; padding: 12px; margin: 8px 0 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: #0b192c; color: white; transition: 0.2s; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); background: #0b192c; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; border-radius: 8px; overflow: hidden; }
-    th { background: var(--primary); color: white; padding: 12px; font-weight: 600; text-align: right; }
-    td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; }
-    tr:hover { background-color: #f1f5f9; }
+    th { background: var(--primary-light); color: white; padding: 12px; font-weight: 600; text-align: right; }
+    td { padding: 12px; border-bottom: 1px solid var(--border); text-align: right; color: #cbd5e1; }
+    tr:hover { background-color: rgba(255,255,255,0.02); }
     .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .badge-rank { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
   </style>
 `;
 
-// 1. الواجهة الرئيسية الاحترافية المطابقة تماماً للتصميم المطلوب
+// 1. الرئيسية المطابقة تماماً للصورة
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -142,191 +142,284 @@ app.get('/', async (req, res) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>لجنة الانضباط الذاتية - CAD OFPPT</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         <style>
           * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
-          body { background-color: #0b192c; color: #ffffff; direction: rtl; overflow-x: hidden; }
-          
-          /* شريط التنقل العلوي الاحترافي */
-          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 5%; background: #07111e; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000; }
-          .logo-area { display: flex; flex-direction: column; align-items: flex-end; }
-          .logo-main { font-weight: 800; font-size: 26px; color: #ffffff; letter-spacing: 1px; }
-          .logo-sub { font-size: 10px; color: #38bdf8; font-weight: 600; letter-spacing: 0.5px; }
-          
-          .nav-links { display: flex; gap: 30px; align-items: center; }
-          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; }
-          .nav-links a:hover, .nav-links a.active { color: #38bdf8; }
-          
-          .admin-btn { background: #0D9488; color: white; padding: 10px 22px; border-radius: 8px; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-          .admin-btn:hover { background: #0f766e; }
+          body { background-color: #07111e; color: #ffffff; direction: rtl; overflow-x: hidden; }
 
-          /* القسم الرئيسي (Hero) مع الخلفية الاحترافية والتدرج */
+          /* شريط التنقل العلوي */
+          .navbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 5%; background: #07111e; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000; }
+          .nav-logos { display: flex; align-items: center; gap: 20px; }
+          .cad-logo-text { font-weight: 800; font-size: 20px; color: #ffffff; border-right: 2px solid rgba(255,255,255,0.2); padding-right: 15px; }
+          .ofppt-logo-text { color: #38bdf8; font-weight: 700; font-size: 15px; }
+
+          .nav-links { display: flex; gap: 25px; align-items: center; }
+          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+          .nav-links a:hover, .nav-links a.active { color: #0D9488; }
+          
+          .nav-right-btns { display: flex; gap: 12px; align-items: center; }
+          .btn-login-nav { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+          .btn-register-nav { background: #0D9488; color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+
+          /* القسم الرئيسي (Hero) */
           .hero-section { 
             position: relative; 
-            background: linear-gradient(90deg, rgba(7, 17, 30, 0.96) 0%, rgba(11, 25, 44, 0.85) 60%, rgba(11, 25, 44, 0.6) 100%), 
+            background: linear-gradient(135deg, rgba(7, 17, 30, 0.95) 0%, rgba(11, 25, 44, 0.9) 100%), 
                         url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; 
-            padding: 90px 5%; 
+            padding: 70px 5%; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             flex-wrap: wrap; 
             gap: 40px; 
-            border-bottom: 4px solid #0D9488; 
+            border-bottom: 3px solid #0D9488; 
           }
-          .hero-content { max-width: 650px; }
-          .welcome-badge { color: #38bdf8; font-weight: 700; margin-bottom: 12px; display: inline-block; font-size: 16px; background: rgba(56, 189, 248, 0.1); padding: 5px 12px; border-radius: 6px; }
-          .hero-content h1 { font-size: 3.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 15px; color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-          .hero-content p { color: #cbd5e1; font-size: 1.15rem; margin-bottom: 35px; line-height: 1.7; }
           
-          .hero-btns { display: flex; gap: 15px; flex-wrap: wrap; }
-          .btn-main { background: #0D9488; color: white; padding: 14px 30px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4); transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 16px; }
-          .btn-main:hover { background: #0f766e; transform: translateY(-2px); }
-          .btn-outline { background: rgba(255,255,255,0.08); color: white; border: 1px solid rgba(255,255,255,0.25); padding: 14px 30px; border-radius: 10px; text-decoration: none; font-weight: 700; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 16px; }
-          .btn-outline:hover { background: rgba(255,255,255,0.18); }
+          .stat-box-left { background: #112238; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; text-align: center; min-width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+          .stat-box-left .num { font-size: 3.5rem; font-weight: 800; color: #0D9488; margin: 5px 0; }
+          
+          .hero-center-badge { text-align: center; flex: 1; min-width: 300px; }
+          .cad-emblem { width: 130px; height: 130px; background: linear-gradient(135deg, #0b192c, #112238); border: 3px solid #0D9488; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 25px rgba(13, 148, 136, 0.4); font-weight: 800; font-size: 22px; color: white; }
+          .cad-emblem span { font-size: 11px; color: #38bdf8; margin-top: 2px; }
 
-          /* بطاقة الإحصائيات الفاخرة */
-          .stats-card { background: rgba(17, 34, 56, 0.9); border: 1px solid rgba(255,255,255,0.12); padding: 35px 45px; border-radius: 18px; text-align: center; min-width: 280px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
-          .stats-icon { font-size: 32px; color: #38bdf8; margin-bottom: 5px; }
-          .stats-number { font-size: 4rem; font-weight: 800; color: #38bdf8; line-height: 1.1; margin: 10px 0; }
-          .stats-label { color: #94a3b8; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.5px; }
+          .hero-text-right { max-width: 450px; text-align: right; }
+          .hero-text-right h3 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 8px; }
+          .hero-text-right h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; color: #ffffff; }
+          .hero-text-right p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.6; }
+          
+          .hero-action-btns { display: flex; gap: 12px; }
+          .btn-hero-login { background: #0D9488; color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; flex: 1; text-align: center; }
+          .btn-hero-reg { background: #112238; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; flex: 1; text-align: center; }
 
           /* قسم ما هي لجنة الانضباط */
-          .about-section { background: #ffffff; color: #1e293b; padding: 80px 5%; text-align: center; }
-          .section-title { font-size: 2.4rem; color: #0b192c; font-weight: 800; margin-bottom: 15px; }
-          .section-desc { max-width: 750px; margin: 0 auto 55px; color: #64748b; font-size: 1.15rem; line-height: 1.8; }
+          .about-section { background: #0b192c; color: #ffffff; padding: 70px 5%; text-align: center; }
+          .section-title { font-size: 2rem; color: #ffffff; font-weight: 800; margin-bottom: 12px; }
+          .section-desc { max-width: 650px; margin: 0 auto 40px; color: #94a3b8; font-size: 1rem; line-height: 1.7; }
           
-          .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 25px; margin-bottom: 50px; }
-          .feature-box { background: #f8fafc; border: 1px solid #e2e8f0; padding: 35px 25px; border-radius: 14px; transition: 0.3s; text-align: right; }
-          .feature-box:hover { transform: translateY(-6px); border-color: #0D9488; box-shadow: 0 12px 25px rgba(0,0,0,0.06); background: #ffffff; }
-          .feature-box h4 { color: #0b192c; font-size: 1.25rem; margin-bottom: 12px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
-          .feature-box p { color: #64748b; font-size: 1rem; line-height: 1.6; }
-          .tagline { font-size: 1.6rem; color: #0D9488; font-weight: 800; letter-spacing: 1px; margin-top: 20px; }
+          .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+          .feature-card { background: #112238; border: 1px solid rgba(255,255,255,0.08); padding: 25px 20px; border-radius: 12px; text-align: right; position: relative; transition: 0.2s; }
+          .feature-card:hover { border-color: #0D9488; transform: translateY(-4px); }
+          .feature-card i { color: #0D9488; font-size: 24px; margin-bottom: 15px; display: block; }
+          .feature-card h4 { color: #ffffff; font-size: 1.1rem; margin-bottom: 8px; }
+          .feature-card p { color: #94a3b8; font-size: 0.85rem; line-height: 1.5; }
+          .arrow-icon { position: absolute; bottom: 15px; left: 15px; color: #0D9488; font-size: 14px; }
 
-          /* قسم القوانين والمعايير التسعة المطابقة تماماً */
-          .rules-section { background: #07111e; padding: 80px 5%; color: white; }
-          .rules-header { text-align: center; max-width: 700px; margin: 0 auto 50px; }
-          .rules-header h2 { color: white; font-size: 2.4rem; margin-bottom: 12px; font-weight: 800; }
-          .rules-header p { color: #94a3b8; font-size: 1.1rem; }
+          /* قسم القوانين والمعايير */
+          .rules-section { background: #07111e; padding: 70px 5%; color: white; }
+          .rules-header { text-align: center; margin-bottom: 40px; }
+          .rules-header h2 { font-size: 2.2rem; margin-bottom: 8px; }
+          .rules-header p { color: #94a3b8; font-size: 0.95rem; }
           
-          .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
-          .rule-card { background: #112238; border: 1px solid rgba(255,255,255,0.08); padding: 22px 25px; border-radius: 12px; display: flex; align-items: center; gap: 20px; transition: 0.2s; }
-          .rule-card:hover { border-color: #0D9488; background: #162b48; }
-          .rule-icon { color: #38bdf8; font-size: 18px; font-weight: 800; background: rgba(56, 189, 248, 0.12); width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 10px; flex-shrink: 0; }
-          .rule-text { font-size: 1.02rem; color: #cbd5e1; line-height: 1.6; font-weight: 600; }
+          .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; }
+          .rule-box { background: #112238; border: 1px solid rgba(255,255,255,0.08); padding: 22px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+          .rule-box-content { display: flex; align-items: center; gap: 15px; text-align: right; }
+          .rule-box i { color: #0D9488; font-size: 24px; flex-shrink: 0; }
+          .rule-box h5 { color: #ffffff; font-size: 1rem; margin-bottom: 3px; font-weight: 700; }
+          .rule-box span { color: #94a3b8; font-size: 0.8rem; }
+          .rule-arrow { color: #0D9488; font-size: 12px; }
 
-          footer { background: #040910; text-align: center; padding: 30px; color: #64748b; font-size: 0.95rem; border-top: 1px solid rgba(255,255,255,0.05); }
+          /* تذييل الصفحة (Footer) */
+          footer { background: #040910; padding: 40px 5% 20px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.05); }
+          .footer-content { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 25px; margin-bottom: 30px; }
+          .footer-social { display: flex; gap: 15px; }
+          .footer-social a { width: 38px; height: 38px; background: #112238; border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; text-decoration: none; transition: 0.2s; }
+          .footer-social a:hover { background: #0D9488; border-color: #0D9488; }
+          .footer-links { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.9rem; }
+          .footer-links a { color: #cbd5e1; text-decoration: none; }
+          .footer-links a:hover { color: #0D9488; }
+          .footer-bottom { text-align: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; font-size: 0.85rem; color: #64748b; }
         </style>
     </head>
     <body>
 
-        <!-- شريط التنقل الاحترافي -->
+        <!-- شريط التنقل العلوي -->
         <div class="navbar">
-            <div class="logo-area">
-                <div class="logo-main">CAD • OFPPT</div>
-                <div class="logo-sub">COMITÉ D'AUTODISCIPLINE</div>
+            <div class="nav-logos">
+                <div class="cad-logo-text">CAD • OFPPT</div>
+                <div class="ofppt-logo-text"><i class="fa-solid fa-graduation-cap"></i> مكتب التكوين المهني وإنعاش الشغل</div>
             </div>
             <div class="nav-links">
-                <a href="/" class="active">الرئيسية</a>
-                <a href="#rules">القوانين والمعايير</a>
-                <a href="/register">التسجيل</a>
-                <a href="/login">تسجيل الدخول</a>
-                <a href="/admin-login" class="admin-btn">👤 المشرفين</a>
+                <a href="/" class="active"><i class="fa-solid fa-house"></i> الرئيسية</a>
+                <a href="#rules"><i class="fa-solid fa-book"></i> القوانين والمعايير</a>
+                <a href="mailto:yassine.iizo3@gmail.com"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
+                <a href="/register"><i class="fa-solid fa-user-plus"></i> التسجيل</a>
+            </div>
+            <div class="nav-right-btns">
+                <a href="/login" class="btn-login-nav">تسجيل الدخول</a>
+                <a href="/admin-login" class="btn-register-nav"><i class="fa-solid fa-user-shield"></i> دخول المشرفين</a>
             </div>
         </div>
 
-        <!-- القسم الرئيسي (Hero) -->
+        <!-- القسم الرئيسي (Hero) المطابق للصورة تماماً -->
         <div class="hero-section">
-            <div class="hero-content">
-                <span class="welcome-badge">مرحباً بكم في موقع</span>
-                <h1>لجنة الانضباط الذاتية (CAD)</h1>
-                <p>معاً من أجل بيئة تكوينية أفضل في مؤسسة التكوين المهني و إنعاش الشغل OFPPT.</p>
-                <div class="hero-btns">
-                    <a href="/register" class="btn-main">➕ تسجيل جديد</a>
-                    <a href="/login" class="btn-outline">🔑 تسجيل الدخول</a>
+            <!-- يسار: عدد المسجلين -->
+            <div class="stat-box-left">
+                <i class="fa-solid fa-users" style="color:#0D9488; font-size:28px; margin-bottom:5px;"></i>
+                <div style="font-size:0.9rem; color:#94a3b8; font-weight:600;">المتدربين المسجلين</div>
+                <div class="num">${acceptedCount}</div>
+            </div>
+
+            <!-- المنتصف: الشعار الدائري CAD -->
+            <div class="hero-center-badge">
+                <div class="cad-emblem">
+                    CAD
+                    <span>OFPPT</span>
                 </div>
             </div>
-            <div class="stats-card">
-                <div class="stats-icon">👥</div>
-                <div class="stats-number">${acceptedCount}</div>
-                <div class="stats-label">عدد المتدربين المسجلين</div>
+
+            <!-- يمين: الترحيب والأزرار -->
+            <div class="hero-text-right">
+                <h3>مرحباً بكم في</h3>
+                <h1>لجنة الانضباط الذاتية (CAD) OFPPT</h1>
+                <p>معاً من أجل بيئة تكوينية سليمة ، قائمة على الاحترام والمسؤولية.</p>
+                <div class="hero-action-btns">
+                    <a href="/login" class="btn-hero-login"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</a>
+                    <a href="/register" class="btn-hero-reg"><i class="fa-solid fa-user-plus"></i> تسجيل جديد</a>
+                </div>
             </div>
         </div>
 
         <!-- قسم ما هي لجنة الانضباط -->
         <div class="about-section">
             <h2 class="section-title">ما هي لجنة الانضباط الذاتية (CAD) ؟</h2>
-            <p class="section-desc">لجنة الانضباط الذاتية هي هيئة طلابية داخل مؤسسة التكوين المهني OFPPT، تعمل على تعزيز قيم الانضباط والسلوك الإيجابي، ومرافقة المتدربين في مسيرتهم التكوينية من أجل بيئة تعليمية سليمة ومحترمة.</p>
+            <p class="section-desc">هي لجنة داخلية تهدف إلى ضمان احترام قواعد السلوك والانضباط داخل المؤسسة التكوينية، من خلال التوعية، والمواكبة، ومعالجة المخالفات وفقاً للقوانين المعمول بها في OFPPT.</p>
             
             <div class="features-grid">
-                <div class="feature-box">
-                    <h4>🤝 معاً نحو مستقبل أفضل</h4>
-                    <p>بناء جسد طلابي واعي ومسؤول يخدم مسيرتك المهنية.</p>
+                <div class="feature-card">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <h4>ما هي اللجنة؟</h4>
+                    <p>تعرف على مهام وأهداف اللجنة.</p>
+                    <i class="fa-solid fa-chevron-left arrow-icon"></i>
                 </div>
-                <div class="feature-box">
-                    <h4>📈 التطوير والاقتراحات</h4>
-                    <p>تطوير المهارات والابتكار واستقبال الأفكار الإيجابية.</p>
+                <div class="feature-card">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                    <h4>القوانين والمعايير</h4>
+                    <p>اطلع على القوانين التي يجب احترامها.</p>
+                    <i class="fa-solid fa-chevron-left arrow-icon"></i>
                 </div>
-                <div class="feature-box">
-                    <h4>👥 تمثيل المتدربين والمرافقة</h4>
-                    <p>دعم المتدربين وسماع شكاياتهم ومرافقتهم طيلة تكوينهم.</p>
+                <div class="feature-card">
+                    <i class="fa-solid fa-book-open"></i>
+                    <h4>التسجيل</h4>
+                    <p>سجل في الموقع وكن عضواً في اللجنة.</p>
+                    <i class="fa-solid fa-chevron-left arrow-icon"></i>
                 </div>
-                <div class="feature-box">
-                    <h4>🛡️ الانضباط والاحترام</h4>
-                    <p>الالتزام باللوائح الداخلية وقواعد الاحترام المتبادل.</p>
+                <div class="feature-card">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <h4>الانضباط والاحترام</h4>
+                    <p>معاً نحو بيئة تكوينية أفضل.</p>
+                    <i class="fa-solid fa-chevron-left arrow-icon"></i>
+                </div>
+                <div class="feature-card">
+                    <i class="fa-solid fa-handshake-angle"></i>
+                    <h4>المواهب والأنشطة</h4>
+                    <p>اكتشف مهارات المتدربين وأنشطتهم.</p>
+                    <i class="fa-solid fa-chevron-left arrow-icon"></i>
                 </div>
             </div>
-
-            <div class="tagline">✨ انضباطك ... نجاحك ✨</div>
         </div>
 
-        <!-- قسم القوانين والمعايير التسعة المطلوبة بدقة -->
+        <!-- قسم القوانين والمعايير المطابق للصورة -->
         <div class="rules-section" id="rules">
             <div class="rules-header">
                 <h2>القوانين والمعايير</h2>
-                <p>احترام هذه القوانين مسؤوليتكم جميعاً من أجل بيئة تكوينية منظمة وآمنة.</p>
+                <p>نلتزم جميعاً بمجموعة من القواعد التي تضمن احتراماً متبادلاً وبيئة تكوينية متوازنة.</p>
             </div>
             
             <div class="rules-grid">
-                <div class="rule-card">
-                    <div class="rule-icon">01</div>
-                    <div class="rule-text">ارتداء اللباس المهني أو الزي المطلوب.</div>
+                <div class="rule-box">
+                    <div class="rule-box-content">
+                        <i class="fa-solid fa-shoe-prints"></i>
+                        <div>
+                            <h5>عدم ارتداء الصنادل</h5>
+                            <span>يجب ارتداء الأندية المناسبة</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-left rule-arrow"></i>
                 </div>
-                <div class="rule-card">
-                    <div class="rule-icon">02</div>
-                    <div class="rule-text">احترام الأطر الإدارية والتكوينية وباقي المتدربين.</div>
+
+                <div class="rule-box">
+                    <div class="rule-box-content">
+                        <i class="fa-solid fa-shirt"></i>
+                        <div>
+                            <h5>الزي المناسب</h5>
+                            <span>الالتزام بالزي المهني واللائق</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-left rule-arrow"></i>
                 </div>
-                <div class="rule-card">
-                    <div class="rule-icon">03</div>
-                    <div class="rule-text">المحافظة على تجهيزات المؤسسة وممتلكاتها.</div>
+
+                <div class="rule-box">
+                    <div class="rule-box-content">
+                        <i class="fa-solid fa-users"></i>
+                        <div>
+                            <h5>احترام الآخرين</h5>
+                            <span>تجنب الكلام النابي والسب</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-left rule-arrow"></i>
                 </div>
-                <div class="rule-card">
-                    <div class="rule-icon">04</div>
-                    <div class="rule-text">عدم التدخين داخل المؤسسة.</div>
+
+                <div class="rule-box">
+                    <div class="rule-box-content">
+                        <i class="fa-solid fa-clock"></i>
+                        <div>
+                            <h5>الالتزام بالمواعيد</h5>
+                            <span>الانضباط في الحضور والمغادرة</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-left rule-arrow"></i>
                 </div>
-                <div class="rule-card">
-                    <div class="rule-icon">05</div>
-                    <div class="rule-text">عدم استعمال الهاتف أو الأجهزة الصوتية أثناء الدروس والامتحانات.</div>
+
+                <div class="rule-box">
+                    <div class="rule-box-content">
+                        <i class="fa-solid fa-ban"></i>
+                        <div>
+                            <h5>منع استعمال الهاتف</h5>
+                            <span>عدم استعمال الهاتف أثناء التكوين</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-left rule-arrow"></i>
                 </div>
-                <div class="rule-card">
-                    <div class="rule-icon">06</div>
-                    <div class="rule-text">عدم إدخال مواد أو أدوات ممنوعة إلى المؤسسة.</div>
-                </div>
-                <div class="rule-card">
-                    <div class="rule-icon">07</div>
-                    <div class="rule-text">الحضور قبل موعد الامتحان بنصف ساعة على الأقل.</div>
-                </div>
-                <div class="rule-card">
-                    <div class="rule-icon">08</div>
-                    <div class="rule-text">احترام أوقات التكوين وعدم البقاء في المؤسسة خارج الأوقات المحددة.</div>
-                </div>
-                <div class="rule-card">
-                    <div class="rule-icon">09</div>
-                    <div class="rule-text">تجنب الغياب والتأخر، فقد تُسجَّل المخالفات وتؤثر في التقييم أو تؤدي إلى إجراءات إدارية.</div>
+
+                <div class="rule-box">
+                    <div class="rule-box-content">
+                        <i class="fa-solid fa-shield-dog"></i>
+                        <div>
+                            <h5>منع العنف</h5>
+                            <span>بيئة آمنة للجميع</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-left rule-arrow"></i>
                 </div>
             </div>
         </div>
 
+        <!-- تذييل الصفحة (Footer) مع معلومات التواصل والأيقونات -->
         <footer>
-            <p>جميع الحقوق محفوظة © لجنة الانضباط الذاتية CAD OFPPT 2026</p>
+            <div class="footer-content">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div style="font-weight:800; font-size:22px; color:white;">OFPPT</div>
+                    <div style="border-right:1px solid rgba(255,255,255,0.2); padding-right:15px; font-weight:700; color:#38bdf8;">CAD OFPPT <br><span style="font-size:11px; color:#94a3b8; font-weight:normal;">معاً من أجل مستقبل أفضل</span></div>
+                </div>
+
+                <div class="footer-links">
+                    <a href="/">الرئيسية</a>
+                    <a href="#rules">القوانين والمعايير</a>
+                    <a href="/register">التسجيل</a>
+                    <a href="mailto:yassine.iizo3@gmail.com">تواصل معنا: yassine.iizo3@gmail.com</a>
+                    <a href="https://wa.me/212707959822" target="_blank">واتساب: 0707959822</a>
+                </div>
+
+                <div class="footer-social">
+                    <a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© 2026 جميع الحقوق محفوظة لمكتب التكوين المهني وإنعاش الشغل OFPPT</p>
+            </div>
         </footer>
 
     </body>
@@ -334,7 +427,7 @@ app.get('/', async (req, res) => {
   `);
 });
 
-// باقي المسارات والروابط البرمجية (المتدربين، المشرفين، الإنذارات، الحذف، الخ...)
+// باقي المسارات (دليل المهارات، التسجيل، الدخول، المشرفين، الحذف، الخ...)
 app.get('/skills-directory', async (req, res) => {
   if (!req.session.isAdmin) {
     return res.redirect('/admin-login');
@@ -352,7 +445,7 @@ app.get('/skills-directory', async (req, res) => {
     <body>
         <div class="container">
             <h2>🌐 دليل مهارات وخبرات المتدربين (خاص بالمشرفين)</h2>
-            <p style="color: #64748b; margin-bottom: 20px;">قائمة بمهارات ولغات المتدربين المقبولين في المؤسسة.</p>
+            <p style="color: #94a3b8; margin-bottom: 20px;">قائمة بمهارات ولغات المتدربين المقبولين في المؤسسة.</p>
             <table>
                 <thead>
                     <tr>
@@ -368,11 +461,11 @@ app.get('/skills-directory', async (req, res) => {
                         <tr>
                             <td><strong>${u.fullname}</strong></td>
                             <td>${u.group}</td>
-                            <td>${u.skills && u.skills.length > 0 ? u.skills.join(', ') : '<span style="color:#94a3b8;">غير مسجلة</span>'}</td>
-                            <td>${u.languages && u.languages.length > 0 ? u.languages.join(', ') : '<span style="color:#94a3b8;">غير مسجلة</span>'}</td>
-                            <td>${u.skillImage ? `<a href="${u.skillImage}" target="_blank" style="color:var(--accent); font-weight:bold;">عرض الملف</a>` : '<span style="color:#94a3b8;">لا يوجد</span>'}</td>
+                            <td>${u.skills && u.skills.length > 0 ? u.skills.join(', ') : '<span style="color:#64748b;">غير مسجلة</span>'}</td>
+                            <td>${u.languages && u.languages.length > 0 ? u.languages.join(', ') : '<span style="color:#64748b;">غير مسجلة</span>'}</td>
+                            <td>${u.skillImage ? `<a href="${u.skillImage}" target="_blank" style="color:var(--accent); font-weight:bold;">عرض الملف</a>` : '<span style="color:#64748b;">لا يوجد</span>'}</td>
                         </tr>
-                    `).join('') : '<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد بيانات مسجلة حالياً</td></tr>'}
+                    `).join('') : '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">لا توجد بيانات مسجلة حالياً</td></tr>'}
                 </tbody>
             </table>
             <p style="text-align:center; margin-top:30px;"><a href="/admin-dashboard" class="btn" style="text-decoration:none;">العودة لوحة التحكم</a></p>
@@ -413,7 +506,7 @@ app.get('/register', (req, res) => {
                 
                 <button type="submit" class="btn btn-success" style="width:100%;">إرسال طلب التسجيل</button>
             </form>
-            <p style="text-align:center; margin-top:20px;"><a href="/" style="color:var(--primary); text-decoration:none;">العودة للرئيسية</a></p>
+            <p style="text-align:center; margin-top:20px;"><a href="/" style="color:#38bdf8; text-decoration:none;">العودة للرئيسية</a></p>
         </div>
     </body>
     </html>
@@ -466,7 +559,7 @@ app.get('/login', (req, res) => {
                 <input type="password" name="password" required>
                 <button type="submit" class="btn" style="width:100%;">دخول</button>
             </form>
-            <p style="text-align:center; margin-top:20px;"><a href="/" style="color:var(--primary); text-decoration:none;">العودة للرئيسية</a></p>
+            <p style="text-align:center; margin-top:20px;"><a href="/" style="color:#38bdf8; text-decoration:none;">العودة للرئيسية</a></p>
         </div>
     </body>
     </html>
@@ -522,21 +615,21 @@ app.get('/profile', async (req, res) => {
         <title>الملف الشخصي - ${user.fullname}</title>
         ${commonCSS}
         <style>
-          .profile-header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+          .profile-header { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; }
           .profile-header h2 { color: white; margin-bottom: 5px; }
-          .announcement-box { background: #fffbeb; border-right: 4px solid #f59e0b; color: #92400e; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-          .warning-box { background: #fff1f2; border-right: 4px solid #e11d48; color: #9f1239; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; }
-          .star-banner { background: linear-gradient(135deg, #fef08a, #fde047); color: #713f12; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; text-align: center; box-shadow: 0 4px 10px rgba(234, 179, 8, 0.2); }
-          .card-section { background: #ffffff; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-          .rank-legend { font-size: 13px; color: #64748b; margin-top: 5px; background: #f1f5f9; padding: 8px 12px; border-radius: 6px; display: inline-block; }
-          .complaint-item { background: #f8fafc; border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+          .announcement-box { background: #162b48; border-right: 4px solid #f59e0b; color: #fde68a; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; }
+          .warning-box { background: #450a0a; border-right: 4px solid #e11d48; color: #fecaca; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; }
+          .star-banner { background: linear-gradient(135deg, #713f12, #854d0e); color: #fef08a; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; text-align: center; }
+          .card-section { background: #112238; border: 1px solid var(--border); padding: 25px; border-radius: 12px; margin-bottom: 25px; }
+          .rank-legend { font-size: 13px; color: #94a3b8; margin-top: 5px; background: #07111e; padding: 8px 12px; border-radius: 6px; display: inline-block; }
+          .complaint-item { background: #07111e; border: 1px solid var(--border); padding: 12px 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         </style>
     </head>
     <body>
         <div class="container">
             ${user.warnings && user.warnings.length > 0 ? `
-                <div class="card-section" style="background: #fff5f5; border-color: #fecaca;">
-                    <h3 style="color: #9f1239; margin-bottom: 15px;">⚠️ تنبيهات وانذارات الإدارة الخاصة</h3>
+                <div class="card-section" style="background: #1a0505; border-color: #7f1d1d;">
+                    <h3 style="color: #fca5a5; margin-bottom: 15px;">⚠️ تنبيهات وانذارات الإدارة الخاصة</h3>
                     ${user.warnings.map(w => `
                         <div class="warning-box">
                             <div><strong>ملاحظة إدارية:</strong> ${w.text}</div>
@@ -546,8 +639,8 @@ app.get('/profile', async (req, res) => {
             ` : ''}
 
             ${announcements.length > 0 ? `
-                <div class="card-section" style="background: #fffdf4; border-color: #fef08a;">
-                    <h3 style="color: #b45309; margin-bottom: 15px;">📢 لوحة الإعلانات والتنبيهات</h3>
+                <div class="card-section" style="background: #1e1b10; border-color: #854d0e;">
+                    <h3 style="color: #f59e0b; margin-bottom: 15px;">📢 لوحة الإعلانات والتنبيهات</h3>
                     ${announcements.map(a => `
                         <div class="announcement-box">
                             <div>🔔 ${a.text}</div>
@@ -586,12 +679,12 @@ app.get('/profile', async (req, res) => {
                     <input type="file" name="skillImage" accept="image/*">
                     <button type="submit" class="btn" style="margin-top: 10px;">حفظ التحديثات</button>
                 </form>
-                ${user.skillImage ? `<div style="margin-top:15px;"><p style="font-size:13px; color:#64748b;">الصورة الحالية:</p><img src="${user.skillImage}" style="max-width:160px; border-radius:8px; border: 1px solid var(--border);"></div>` : ''}
+                ${user.skillImage ? `<div style="margin-top:15px;"><p style="font-size:13px; color:#94a3b8;">الصورة الحالية:</p><img src="${user.skillImage}" style="max-width:160px; border-radius:8px; border: 1px solid var(--border);"></div>` : ''}
             </div>
 
             <div class="card-section">
                 <h3>💡 صندوق الابتكار والمبادرات الطلابية</h3>
-                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">شاركنا بأفكارك الابتكارية أو مقترحاتك لتطوير فضاء المؤسسة أو الأنشطة الموازية.</p>
+                <p style="font-size: 13px; color: #94a3b8; margin-bottom: 15px;">شاركنا بأفكارك الابتكارية أو مقترحاتك لتطوير فضاء المؤسسة أو الأنشطة الموازية.</p>
                 <form action="/add-initiative" method="POST">
                     <input type="hidden" name="cin" value="${user.cin}">
                     <textarea name="initiativeText" rows="3" placeholder="اكتب فكرتك أو مقترحك الابتكاري هنا..." required></textarea>
@@ -604,10 +697,10 @@ app.get('/profile', async (req, res) => {
                         <div class="complaint-item">
                             <div><strong>${i.text}</strong></div>
                             <div>
-                                <span class="badge" style="background: #e0f2fe; color: #0284c7;">${i.status}</span>
+                                <span class="badge" style="background: #0284c7; color: white;">${i.status}</span>
                             </div>
                         </div>
-                    `).join('') : '<p style="color: #64748b; font-size: 14px;">لم تقم بإرسال أي مبادرات بعد.</p>'}
+                    `).join('') : '<p style="color: #94a3b8; font-size: 14px;">لم تقم بإرسال أي مبادرات بعد.</p>'}
                 </div>
             </div>
 
@@ -625,19 +718,19 @@ app.get('/profile', async (req, res) => {
                         <div class="complaint-item">
                             <div><strong>${c.text}</strong></div>
                             <div>
-                                <span class="badge" style="background: ${c.status === 'قيد المراجعة' ? '#fef3c7' : '#d1fae5'}; color: ${c.status === 'قيد المراجعة' ? '#d97706' : '#059669'};">
+                                <span class="badge" style="background: ${c.status === 'قيد المراجعة' ? '#78350f' : '#064e3b'}; color: ${c.status === 'قيد المراجعة' ? '#fde68a' : '#a7f3d0'};">
                                     ${c.status}
                                 </span>
                             </div>
                         </div>
-                    `).join('') : '<p style="color: #64748b; font-size: 14px;">لا توجد شكايات مرسلة حالياً.</p>'}
+                    `).join('') : '<p style="color: #94a3b8; font-size: 14px;">لا توجد شكايات مرسلة حالياً.</p>'}
                 </div>
             </div>
 
             <div class="card-section">
                 <h3>🏆 نتائج المسابقات والأنشطة</h3>
                 <ul style="padding-right: 20px; margin: 0;">
-                    ${competitions.length > 0 ? competitions.map(c => `<li style="margin-bottom: 8px;"><b>${c.title}:</b> ${c.result}</li>`).join('') : '<p style="color: #64748b; font-size: 14px;">لا توجد مسابقات معلنة حالياً.</p>'}
+                    ${competitions.length > 0 ? competitions.map(c => `<li style="margin-bottom: 8px; color:#cbd5e1;"><b>${c.title}:</b> ${c.result}</li>`).join('') : '<p style="color: #94a3b8; font-size: 14px;">لا توجد مسابقات معلنة حالياً.</p>'}
                 </ul>
             </div>
 
@@ -714,7 +807,7 @@ app.get('/admin-login', (req, res) => {
                 <input type="password" name="adminPass" required>
                 <button type="submit" class="btn btn-danger" style="width:100%;">دخول اللوحة</button>
             </form>
-            <p style="text-align:center; margin-top:20px;"><a href="/" style="color:var(--primary); text-decoration:none;">العودة للرئيسية</a></p>
+            <p style="text-align:center; margin-top:20px;"><a href="/" style="color:#38bdf8; text-decoration:none;">العودة للرئيسية</a></p>
         </div>
     </body>
     </html>
@@ -744,9 +837,9 @@ app.post('/admin-dashboard', async (req, res) => {
         <title>لوحة إدارة لجنة الانضباط - CAD</title>
         ${commonCSS}
         <style>
-          .admin-section { background: #f8fafc; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
+          .admin-section { background: #0b192c; border: 1px solid var(--border); padding: 20px; border-radius: 12px; margin-bottom: 25px; }
           .search-box { position: relative; margin-bottom: 20px; }
-          .search-box input { padding-right: 40px; font-size: 16px; border: 2px solid var(--primary-light); }
+          .search-box input { padding-right: 40px; font-size: 16px; border: 2px solid var(--accent); }
         </style>
     </head>
     <body>
@@ -782,9 +875,9 @@ app.post('/admin-dashboard', async (req, res) => {
                                 <td class="user-name">${u.fullname}</td>
                                 <td class="user-cin">${u.cin}</td>
                                 <td class="user-group">${u.group}</td>
-                                <td>${u.pnj ? `<a href="${u.pnj}" target="_blank" style="color:var(--accent);">عرض</a>` : 'لا يوجد'}</td>
+                                <td>${u.pnj ? `<a href="${u.pnj}" target="_blank" style="color:#38bdf8;">عرض</a>` : 'لا يوجد'}</td>
                                 <td>
-                                    ${u.status === 'pending' ? '<span style="color:#d97706; font-weight:bold;">قيد الانتظار</span>' : '<span style="color:#059669; font-weight:bold;">مقبول</span>'}
+                                    ${u.status === 'pending' ? '<span style="color:#f59e0b; font-weight:bold;">قيد الانتظار</span>' : '<span style="color:#10b981; font-weight:bold;">مقبول</span>'}
                                     <form action="/admin/update-rank" method="POST" style="margin-top:5px;">
                                         <input type="hidden" name="cin" value="${u.cin}">
                                         <select name="rank" onchange="this.form.submit()" style="margin:0; padding:2px; font-size:12px;">
@@ -842,7 +935,7 @@ app.post('/admin-dashboard', async (req, res) => {
                         ${announcements.length > 0 ? announcements.map(a => `
                             <tr>
                                 <td>${a.text}</td>
-                                <td>${a.image ? `<a href="${a.image}" target="_blank" style="color:var(--accent);">عرض الصورة</a>` : 'لا توجد'}</td>
+                                <td>${a.image ? `<a href="${a.image}" target="_blank" style="color:#38bdf8;">عرض الصورة</a>` : 'لا توجد'}</td>
                                 <td>
                                     <form action="/admin/announcement/delete" method="POST" style="margin:0;">
                                         <input type="hidden" name="id" value="${a._id}">
@@ -892,7 +985,7 @@ app.post('/admin-dashboard', async (req, res) => {
                                 <td>${i.senderName} (${i.senderCin})</td>
                                 <td>${i.group}</td>
                                 <td>${i.text}</td>
-                                <td><span style="color:#0284c7; font-weight:bold;">${i.status}</span></td>
+                                <td><span style="color:#38bdf8; font-weight:bold;">${i.status}</span></td>
                                 <td>
                                     <form action="/admin/initiative/review" method="POST" style="display:inline;">
                                         <input type="hidden" name="id" value="${i._id}">
@@ -904,7 +997,7 @@ app.post('/admin-dashboard', async (req, res) => {
                                     </form>
                                 </td>
                             </tr>
-                        `).join('') : '<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد مبادرات واردة حالياً</td></tr>'}
+                        `).join('') : '<tr><td colspan="5" style="text-align:center; color:#94a3b8;">لا توجد مبادرات واردة حالياً</td></tr>'}
                     </tbody>
                 </table>
             </div>
@@ -927,7 +1020,7 @@ app.post('/admin-dashboard', async (req, res) => {
                                 <td>${c.senderName} (${c.senderCin})</td>
                                 <td>${c.group}</td>
                                 <td>${c.text}</td>
-                                <td><span style="color:${c.status === 'قيد المراجعة' ? '#d97706' : '#059669'}; font-weight:bold;">${c.status}</span></td>
+                                <td><span style="color:${c.status === 'قيد المراجعة' ? '#f59e0b' : '#10b981'}; font-weight:bold;">${c.status}</span></td>
                                 <td>
                                     ${c.status === 'قيد المراجعة' ? `
                                         <form action="/admin/complaint/review" method="POST" style="display:inline;">
