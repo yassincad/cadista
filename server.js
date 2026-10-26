@@ -131,7 +131,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الرئيسية مع دمج الشعار باحترافية تامة
+// 1. الرئيسية المطابقة تماماً للصورة الاحترافية الثانية
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -161,7 +161,7 @@ app.get('/', async (req, res) => {
           .btn-login-nav { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
           .btn-register-nav { background: #0D9488; color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
 
-          /* القسم الرئيسي (Hero) */
+          /* القسم الرئيسي (Hero) المطابق للصورة تماماً */
           .hero-section { 
             position: relative; 
             background: linear-gradient(135deg, rgba(7, 17, 30, 0.95) 0%, rgba(11, 25, 44, 0.9) 100%), 
@@ -180,21 +180,16 @@ app.get('/', async (req, res) => {
           
           .hero-center-badge { text-align: center; flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
           
-          /* تحسين مظهر الشعار ليكون مندمجاً واحترافياً بدون خلفية بيضاء صلبة نشاز */
+          /* إزالة الخلفية البيضاء للشعار ودمجه باحترافية تامة */
           .cad-logo-img { 
-            max-width: 280px; 
+            max-width: 260px; 
             height: auto; 
-            border-radius: 14px; 
-            background: transparent; 
-            padding: 10px; 
-            filter: drop-shadow(0 0 20px rgba(13, 148, 136, 0.4));
-            mix-blend-mode: luminosity;
-            transition: 0.3s ease;
+            border-radius: 20px; 
+            mix-blend-mode: screen; 
+            filter: drop-shadow(0 0 25px rgba(13, 148, 136, 0.5));
+            transition: transform 0.3s ease;
           }
-          .cad-logo-img:hover {
-            mix-blend-mode: normal;
-            transform: scale(1.03);
-          }
+          .cad-logo-img:hover { transform: scale(1.05); }
 
           .hero-text-right { max-width: 450px; text-align: right; }
           .hero-text-right h3 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 8px; }
@@ -206,7 +201,7 @@ app.get('/', async (req, res) => {
           .btn-hero-reg { background: #112238; border: 1px solid rgba(255,255,255,0.2); color: white; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: 700; flex: 1; text-align: center; }
 
           /* قسم ما هي لجنة الانضباط */
-          .about-section { background: #0b192c; color: #ffffff; padding: 70px 5%; text-align: center; }
+          .about-section { background: #07111e; color: #ffffff; padding: 70px 5%; text-align: center; }
           .section-title { font-size: 2rem; color: #ffffff; font-weight: 800; margin-bottom: 12px; }
           .section-desc { max-width: 650px; margin: 0 auto 40px; color: #94a3b8; font-size: 1rem; line-height: 1.7; }
           
@@ -264,7 +259,7 @@ app.get('/', async (req, res) => {
             </div>
         </div>
 
-        <!-- القسم الرئيسي (Hero) مع دمج الشعار باحترافية -->
+        <!-- القسم الرئيسي (Hero) مع الشعار المدمج -->
         <div class="hero-section">
             <!-- يسار: عدد المسجلين -->
             <div class="stat-box-left">
@@ -438,7 +433,7 @@ app.get('/', async (req, res) => {
   `);
 });
 
-// باقي المسارات البرمجية
+// باقي المسارات البرمجية للملف الشخصي والمشرفين
 app.get('/skills-directory', async (req, res) => {
   if (!req.session.isAdmin) {
     return res.redirect('/admin-login');
@@ -1158,7 +1153,7 @@ app.post('/admin/complaint/delete', async (req, res) => {
 });
 
 app.post('/admin/initiative/review', async (req, res) => {
-  const { id } = req.body;
+  const { id } =, req.body;
   await Initiative.findByIdAndUpdate(id, { status: 'تم قبول المبادرة ودراستها' });
   res.redirect(307, '/admin-dashboard');
 });
