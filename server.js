@@ -131,7 +131,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الرئيسية المطابقة تماماً للصورة
+// 1. الرئيسية مع صورة الشعار الرسمية الجديدة بدلاً من الدائرة
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -178,9 +178,9 @@ app.get('/', async (req, res) => {
           .stat-box-left { background: #112238; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; text-align: center; min-width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
           .stat-box-left .num { font-size: 3.5rem; font-weight: 800; color: #0D9488; margin: 5px 0; }
           
-          .hero-center-badge { text-align: center; flex: 1; min-width: 300px; }
-          .cad-emblem { width: 130px; height: 130px; background: linear-gradient(135deg, #0b192c, #112238); border: 3px solid #0D9488; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 25px rgba(13, 148, 136, 0.4); font-weight: 800; font-size: 22px; color: white; }
-          .cad-emblem span { font-size: 11px; color: #38bdf8; margin-top: 2px; }
+          .hero-center-badge { text-align: center; flex: 1; min-width: 300px; display: flex; justify-content: center; align-items: center; }
+          .cad-logo-img { max-width: 260px; height: auto; border-radius: 16px; background: rgba(255,255,255,0.95); padding: 15px 25px; box-shadow: 0 0 35px rgba(13, 148, 136, 0.35); transition: transform 0.3s ease; }
+          .cad-logo-img:hover { transform: scale(1.03); }
 
           .hero-text-right { max-width: 450px; text-align: right; }
           .hero-text-right h3 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 8px; }
@@ -250,7 +250,7 @@ app.get('/', async (req, res) => {
             </div>
         </div>
 
-        <!-- القسم الرئيسي (Hero) المطابق للصورة تماماً -->
+        <!-- القسم الرئيسي (Hero) مع صورة الشعار الرسمية بدلاً من الدائرة -->
         <div class="hero-section">
             <!-- يسار: عدد المسجلين -->
             <div class="stat-box-left">
@@ -259,12 +259,9 @@ app.get('/', async (req, res) => {
                 <div class="num">${acceptedCount}</div>
             </div>
 
-            <!-- المنتصف: الشعار الدائري CAD -->
+            <!-- المنتصف: صورة شعار CAD الرسمية -->
             <div class="hero-center-badge">
-                <div class="cad-emblem">
-                    CAD
-                    <span>OFPPT</span>
-                </div>
+                <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="cad-logo-img" onerror="this.onerror=null; this.src='https://i.imgur.com/7kX1g6u.png';">
             </div>
 
             <!-- يمين: الترحيب والأزرار -->
@@ -318,7 +315,7 @@ app.get('/', async (req, res) => {
             </div>
         </div>
 
-        <!-- قسم القوانين والمعايير المطابق للصورة -->
+        <!-- قسم القوانين والمعايير -->
         <div class="rules-section" id="rules">
             <div class="rules-header">
                 <h2>القوانين والمعايير</h2>
@@ -331,7 +328,7 @@ app.get('/', async (req, res) => {
                         <i class="fa-solid fa-shoe-prints"></i>
                         <div>
                             <h5>عدم ارتداء الصنادل</h5>
-                            <span>يجب ارتداء الأندية المناسبة</span>
+                            <span>يجب ارتداء الأحذية المناسبة</span>
                         </div>
                     </div>
                     <i class="fa-solid fa-chevron-left rule-arrow"></i>
@@ -394,7 +391,7 @@ app.get('/', async (req, res) => {
             </div>
         </div>
 
-        <!-- تذييل الصفحة (Footer) مع معلومات التواصل والأيقونات -->
+        <!-- تذييل الصفحة (Footer) -->
         <footer>
             <div class="footer-content">
                 <div style="display:flex; align-items:center; gap:15px;">
@@ -427,7 +424,7 @@ app.get('/', async (req, res) => {
   `);
 });
 
-// باقي المسارات (دليل المهارات، التسجيل، الدخول، المشرفين، الحذف، الخ...)
+// باقي المسارات البرمجية
 app.get('/skills-directory', async (req, res) => {
   if (!req.session.isAdmin) {
     return res.redirect('/admin-login');
