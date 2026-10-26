@@ -1153,7 +1153,7 @@ app.post('/admin/complaint/delete', async (req, res) => {
 });
 
 app.post('/admin/initiative/review', async (req, res) => {
-  const { id } =, req.body;
+  const { id } = req.body;
   await Initiative.findByIdAndUpdate(id, { status: 'تم قبول المبادرة ودراستها' });
   res.redirect(307, '/admin-dashboard');
 });
