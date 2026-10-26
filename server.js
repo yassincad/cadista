@@ -131,7 +131,7 @@ const commonCSS = `
   </style>
 `;
 
-// 1. الرئيسية مع الشعارات العلوية الاحترافية
+// 1. الرئيسية مع التطابق المؤسساتي التام والطبقات المتداخلة
 app.get('/', async (req, res) => {
   const acceptedCount = await User.countDocuments({ status: 'accepted' });
   res.send(`
@@ -147,58 +147,110 @@ app.get('/', async (req, res) => {
           * { box-sizing: border-box; font-family: 'Cairo', sans-serif; margin: 0; padding: 0; }
           body { background-color: #07111e; color: #ffffff; direction: rtl; overflow-x: hidden; }
 
-          /* شريط التنقل العلوي مع الشعارات المطلوبة */
+          /* شريط التنقل العلوي المؤسساتي */
           .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: #07111e; border-bottom: 1px solid rgba(255,255,255,0.08); position: sticky; top: 0; z-index: 1000; }
           
-          .nav-links { display: flex; gap: 25px; align-items: center; }
-          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
-          .nav-links a:hover, .nav-links a.active { color: #0D9488; }
-          
-          .nav-right-btns { display: flex; gap: 12px; align-items: center; }
-          .btn-login-nav { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
-          .btn-register-nav { background: #0D9488; color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
-
-          /* تنسيق الشعارات في أعلى اليمين (حسب الصورة المرفقة) */
+          /* اليمين: الشعارات الرسمية */
           .top-brand-logos { display: flex; align-items: center; gap: 15px; }
-          .cad-brand-logo { height: 40px; width: auto; filter: drop-shadow(0 0 8px rgba(13,148,136,0.3)); }
-          .brand-divider { width: 1px; height: 30px; background: rgba(255,255,255,0.2); }
+          .cad-brand-logo { height: 42px; width: auto; filter: drop-shadow(0 0 8px rgba(13,148,136,0.3)); }
+          .brand-divider { width: 1px; height: 32px; background: rgba(255,255,255,0.2); }
           .ofppt-brand-group { display: flex; align-items: center; gap: 10px; text-align: left; }
           .ofppt-brand-shapes { display: flex; gap: 3px; }
           .ofppt-brand-shapes span { width: 10px; height: 18px; background: #38bdf8; transform: skewX(-20deg); display: inline-block; }
           .ofppt-brand-shapes span:nth-child(2) { background: #0D9488; }
           .ofppt-brand-text { font-size: 11px; font-weight: 700; color: #cbd5e1; line-height: 1.2; text-align: right; }
 
-          /* القسم الرئيسي (Hero) */
+          /* المنتصف: روابط التنقل */
+          .nav-links { display: flex; gap: 25px; align-items: center; }
+          .nav-links a { color: #cbd5e1; text-decoration: none; font-weight: 600; font-size: 15px; transition: 0.2s; display: flex; align-items: center; gap: 6px; }
+          .nav-links a:hover, .nav-links a.active { color: #0D9488; }
+          
+          /* اليسار: أزرار الدخول */
+          .nav-right-btns { display: flex; gap: 12px; align-items: center; }
+          .btn-login-nav { background: transparent; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+          .btn-register-nav { background: #0D9488; color: white; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+
+          /* القسم الرئيسي (Hero) مع الطبقات المتداخلة والشفافية المتقدمة والخطوط المائلة */
           .hero-section { 
             position: relative; 
-            background: linear-gradient(135deg, rgba(7, 17, 30, 0.95) 0%, rgba(11, 25, 44, 0.9) 100%), 
+            background: linear-gradient(135deg, rgba(7, 17, 30, 0.92) 0%, rgba(11, 25, 44, 0.88) 100%), 
                         url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat; 
-            padding: 70px 5%; 
+            padding: 80px 5%; 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             flex-wrap: wrap; 
-            gap: 40px; 
+            gap: 30px; 
             border-bottom: 3px solid #0D9488; 
+            overflow: hidden;
           }
           
-          .stat-box-left { background: #112238; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 30px; text-align: center; min-width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
-          .stat-box-left .num { font-size: 3.5rem; font-weight: 800; color: #0D9488; margin: 5px 0; }
-          
-          .hero-center-badge { text-align: center; flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; }
+          /* لمسة الخطوط والزوايا المائلة والطبقات الهندسية الديناميكية */
+          .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            right: -60px;
+            width: 320px;
+            height: 320px;
+            background: linear-gradient(135deg, rgba(13, 148, 136, 0.18), transparent);
+            transform: rotate(45deg);
+            pointer-events: none;
+          }
+          .hero-section::after {
+            content: '';
+            position: absolute;
+            bottom: -90px;
+            left: -90px;
+            width: 450px;
+            height: 450px;
+            background: linear-gradient(135deg, transparent, rgba(56, 189, 248, 0.09));
+            transform: rotate(-30deg) skewX(-15deg);
+            pointer-events: none;
+          }
+
+          /* بطاقة الإحصائيات المزدوجة على اليسار */
+          .stat-box-left { 
+            background: rgba(17, 34, 56, 0.85); 
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12); 
+            border-radius: 16px; 
+            padding: 25px 20px; 
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+            min-width: 320px;
+            z-index: 2;
+          }
+          .stat-item { text-align: center; flex: 1; }
+          .stat-item .num { font-size: 2.8rem; font-weight: 800; color: #0D9488; margin: 2px 0; }
+          .stat-divider { width: 1px; height: 70px; background: rgba(255,255,255,0.15); }
+
+          /* المنتصف: شعار CAD مع إطار إضاءة زجاجي */
+          .hero-center-badge { text-align: center; flex: 1; min-width: 280px; display: flex; justify-content: center; align-items: center; z-index: 2; }
+          .cad-logo-glow-wrapper {
+            position: relative;
+            padding: 15px;
+            border-radius: 24px;
+            background: rgba(11, 25, 44, 0.6);
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(13, 148, 136, 0.4);
+            box-shadow: 0 0 40px rgba(13, 148, 136, 0.35), inset 0 0 20px rgba(13, 148, 136, 0.2);
+          }
           .cad-logo-img { 
-            max-width: 260px; 
+            max-width: 250px; 
             height: auto; 
-            border-radius: 20px; 
-            mix-blend-mode: screen; 
-            filter: drop-shadow(0 0 25px rgba(13, 148, 136, 0.5));
+            border-radius: 14px; 
+            display: block;
             transition: transform 0.3s ease;
           }
-          .cad-logo-img:hover { transform: scale(1.05); }
+          .cad-logo-img:hover { transform: scale(1.03); }
 
-          .hero-text-right { max-width: 450px; text-align: right; }
+          /* اليمين: النصوص الترحيبية والأزرار */
+          .hero-text-right { max-width: 460px; text-align: right; z-index: 2; }
           .hero-text-right h3 { color: #38bdf8; font-size: 1.1rem; margin-bottom: 8px; }
-          .hero-text-right h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; color: #ffffff; }
+          .hero-text-right h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.25; margin-bottom: 12px; color: #ffffff; }
           .hero-text-right p { color: #94a3b8; font-size: 0.95rem; margin-bottom: 25px; line-height: 1.6; }
           
           .hero-action-btns { display: flex; gap: 12px; }
@@ -246,21 +298,9 @@ app.get('/', async (req, res) => {
     </head>
     <body>
 
-        <!-- شريط التنقل العلوي مع شعارات CAD و OFPPT المطابقة تماماً للصورة -->
+        <!-- شريط التنقل العلوي المؤسساتي المطابق للصورة -->
         <div class="navbar">
-            <div class="nav-links">
-                <a href="/" class="active"><i class="fa-solid fa-house"></i> الرئيسية</a>
-                <a href="#rules"><i class="fa-solid fa-book"></i> القوانين والمعايير</a>
-                <a href="mailto:yassine.iizo3@gmail.com"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
-                <a href="/register"><i class="fa-solid fa-user-plus"></i> التسجيل</a>
-            </div>
-
-            <div class="nav-right-btns">
-                <a href="/login" class="btn-login-nav">تسجيل الدخول</a>
-                <a href="/admin-login" class="btn-register-nav"><i class="fa-solid fa-user-shield"></i> دخول المشرفين</a>
-            </div>
-
-            <!-- الشعارات في الأعلى (يمين الصفحة) -->
+            <!-- اليمين: الشعارات الرسمية -->
             <div class="top-brand-logos">
                 <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار CAD" class="cad-brand-logo">
                 <div class="brand-divider"></div>
@@ -275,26 +315,51 @@ app.get('/', async (req, res) => {
                     </div>
                 </div>
             </div>
+
+            <!-- المنتصف: روابط التنقل -->
+            <div class="nav-links">
+                <a href="/" class="active"><i class="fa-solid fa-house"></i> الرئيسية</a>
+                <a href="#rules"><i class="fa-solid fa-book"></i> القوانين والمعايير</a>
+                <a href="mailto:yassine.iizo3@gmail.com"><i class="fa-solid fa-envelope"></i> تواصل معنا</a>
+                <a href="/register"><i class="fa-solid fa-user-plus"></i> التسجيل</a>
+            </div>
+
+            <!-- اليسار: أزرار الدخول -->
+            <div class="nav-right-btns">
+                <a href="/login" class="btn-login-nav">تسجيل الدخول</a>
+                <a href="/admin-login" class="btn-register-nav"><i class="fa-solid fa-user-shield"></i> دخول المشرفين</a>
+            </div>
         </div>
 
-        <!-- القسم الرئيسي (Hero) مع الشعار المدمج -->
+        <!-- القسم الرئيسي (Hero) مع الطبقات المتداخلة، الشفافية، والخطوط المائلة -->
         <div class="hero-section">
-            <!-- يسار: عدد المسجلين -->
+            <!-- اليسار: بطاقة الإحصائيات المزدوجة (المتدربين المسجلين والمشرفين) -->
             <div class="stat-box-left">
-                <i class="fa-solid fa-users" style="color:#0D9488; font-size:28px; margin-bottom:5px;"></i>
-                <div style="font-size:0.9rem; color:#94a3b8; font-weight:600;">المتدربين المسجلين</div>
-                <div class="num">${acceptedCount}</div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-users" style="color:#0D9488; font-size:24px; margin-bottom:4px;"></i>
+                    <div style="font-size:0.8rem; color:#94a3b8; font-weight:600;">المتدربين المسجلين</div>
+                    <div class="num">${acceptedCount}</div>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat-item">
+                    <i class="fa-solid fa-shield-halved" style="color:#0D9488; font-size:24px; margin-bottom:4px;"></i>
+                    <div style="font-size:0.8rem; color:#94a3b8; font-weight:600;">المشرفين</div>
+                    <div class="num" style="font-size: 2.5rem;">5</div>
+                    <div style="font-size:0.75rem; color:#10b981; margin-top:2px;"><i class="fa-solid fa-circle" style="font-size:7px;"></i> نشطون</div>
+                </div>
             </div>
 
-            <!-- المنتصف: شعار CAD مندمج واحترافي -->
+            <!-- المنتصف: شعار CAD المركزي مع إطار إضاءة زجاجي -->
             <div class="hero-center-badge">
-                <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="cad-logo-img">
+                <div class="cad-logo-glow-wrapper">
+                    <img src="https://res.cloudinary.com/scgacjvy/image/upload/v1792262240/WhatsApp_Image_2026-10-17_at_6.36.49_PM.jpg" alt="شعار لجنة الانضباط الذاتية CAD" class="cad-logo-img">
+                </div>
             </div>
 
-            <!-- يمين: الترحيب والأزرار -->
+            <!-- اليمين: الترحيب، النصوص، والأزرار -->
             <div class="hero-text-right">
                 <h3>مرحباً بكم في</h3>
-                <h1>لجنة الانضباط الذاتية (CAD) OFPPT</h1>
+                <h1>لجنة الانضباط الذاتية (CAD)<br><span style="color: #38bdf8;">OFPPT</span></h1>
                 <p>معاً من أجل بيئة تكوينية سليمة ، قائمة على الاحترام والمسؤولية.</p>
                 <div class="hero-action-btns">
                     <a href="/login" class="btn-hero-login"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</a>
